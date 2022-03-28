@@ -1,8 +1,5 @@
-% new_driver
-
-% TODO: when done, save over the old driver
-
-
+% This code will generate a lognormal network using CNM
+% and then pass this network through gmuric's SIR
 
 %% Parameters
 
@@ -10,9 +7,9 @@
 N = 1000; % try for this many nodes
 PLOT = [1,1];
 
-% cm
+% CNM
 dist = 'lognormal'; % use 'makedist' to see list of possibles
-sigma2 = 0.5; % change me based on dist VERY SENSITIVE
+sigma2 = 1; % change me based on dist VERY SENSITIVE
 mu = 1; % change me based on dist SLIGHTLY SENSITIVE
 
 % SIRn
@@ -29,7 +26,7 @@ init_net = zeros(1,N);
 for i = 1:N % build degree dist by prob dist
     init_net(i) = pd.random;
 end
-init_net = floor(init_net); % degrees are ints
+init_net = ceil(init_net); % degrees are ints
 disp("Building network from distribution...")
 net = cm_net(init_net); % pass dist to cm for adj mat
 
@@ -37,6 +34,7 @@ net = cm_net(init_net); % pass dist to cm for adj mat
 disp("Beginning simulation...")
 [inf,nisum,rec,infsum] = ...
     sir_simulation(net,parents,p,immunized,r,num_of_steps);
+
 %% Plot
 
 disp("Plotting...")
@@ -66,9 +64,39 @@ end
 
 if PLOT(1)
     figure
-    subplot(1,2,1)
+    metrics = exportMetricsFile(graph(net), 'Title','metrics');
+    avgAssort = mean(metrics.assortativityByNode);
+    avgDegree = mean(init_net);
+    subtitstr = dist+", \mu="+num2str(mu)+...
+                ", \sigma="+num2str(sigma2);
+
+    subplot(2,2,1)
     plot(graph(net))
-    subplot(1,2,2)
+    title("Network Visualization")
+    subtitle(subtitstr)
+
+    subplot(2,2,2)
     hist(init_net)
+    hold on
+    xline(avgDegree, 'Color', 'r', 'LineWidth', 2)
+    hold off
+    title("Degree Distribution")
+    subtitle("Mean: " + num2str(avgDegree))
+
+    subplot(2,2,3)
+    hist(metrics.assortativityByNode)
+    title("Assortativity by Node")
+    subtitle("Mean: " + num2str(avgAssort))
+    hold on
+    xline(avgAssort, 'Color', 'r', 'LineWidth', 2);
+    hold off
+
+    subplot(2,2,4)
+    hist(metrics.clusterings)
+    hold on
+    xline(metrics.avgClustering, 'Color', 'r', 'LineWidth', 2);
+    title("Clustering")
+    subtitle("Mean: " + num2str(metrics.avgClustering))
+    hold off
 end
 
