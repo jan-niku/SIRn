@@ -1,0 +1,109 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\title{Competing Ideas on Networks: \\ Structural Impacts on Saturation and Variance}
+\author{Levi Grenier, Nathan Smith, Brendan Stewart}
+\date{March 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Outline}
+
+\begin{enumerate}[label=\arabic*.]
+    \item Biological Background and Motivation
+    
+        \begin{enumerate}[label=\Alph*.]
+        \item Our goal through this project is to model two competing ideas on a social network and show that the time-to-saturation and the long-term distribution of believers is dependent on the network's structure.
+        
+    
+        \end{enumerate}
+    
+    \item Previous Mathematical Models
+    
+        \begin{enumerate}[label=\Alph*.]
+        \item The first models we examined are those outlined by Duncan J. Watts in his paper ``A Simple Model of Global Cascades". This paper first informed the choice of a `voting' strategy; an idea or opinion fundamentally differs from a virus or other infectious contagion in that a single exposure to an idea may not be sufficient to alter an individuals feelings. Watts' paper differs from our approach, as he mostly studies binary-state nodes, and resulting network stability, where as we are curious about many-state (at least 3) nodes. 
+
+        \item We further explored differing voting strategies, such as those detailed in ``Threshold q-Voter Model" (Vieiral and Anteneodo, 2018). This paper does a fantastic job of illustrating the impact of different voter strategies, and different stochastic (`outside') influences, on the final states and time-to-stability of networks. In particular, their exploration of voting proportions and the resulting stability of, or existence of, majority states will be very useful in our decision of the 'awareness' distributions.  
+        
+
+        
+        \end{enumerate}
+    
+    \item Our Approach
+    
+        \begin{enumerate}[label=\Alph*.]
+        
+        \item We begin with two mutually exclusive beliefs. We have an initial network with a high number of susceptible nodes, interpreted as individuals with no preconception towards these beliefs.
+        
+        \item We will then create a modified discrete-time voter model to include awareness and random changes in opinion. We will do this by sampling from a uniform distribution to determine a proportion of neighboring nodes to "consult" per time step.
+        
+        \item Individuals take on opinions by following a voting strategy, per time step:
+            \begin{enumerate}[label=\arabic*.]
+                \item Individuals have some level of momentary awareness about a topic, and speak to some proportion of their neighbors about this topic. We'll call this proportion the "influencers" of some individual.
+                \item Individuals follow majority; they take on whatever opinion the majority of their influencers have.
+            \end{enumerate}
+        
+        \item We then run the modified voter model on an adjacency matrix that have been randomly-generated to represent our various network structures and degree distributions. 
+        
+        \item After saturation, we will introduce perturbations by randomly "flipping" individual's opinions. Under these perturbations, we may determine the variance of the percentage of the population that believes an opinion.
+        
+        \item We repeat this process for various types of networks and/or parameter values for degree distributions. 
+        
+        \end{enumerate}
+        
+    \item Expected Conclusions
+    
+        \begin{enumerate}[label=\Alph*.]
+        \item We anticipate that the primary drivers of the type of stability attained, the time to saturation, and the resistance to small perturbations, will be clustering, degree distribution, and assortivity. We will seek to confirm this by varying these network parameters and observing long-term behavior, as well as introducing random perturbations. 
+        \end{enumerate}
+
+\end{enumerate}
+
+
+%We begin with two mutually exclusive beliefs. We have an initial network with a high number of susceptible nodes, interpreted as individuals with no preconception towards these beliefs. Individuals also experience random fluctuations in awareness; this causes them to only 'poll' a certain number of their neighbors per discrete time step. Occasionally, individuals will speak with a large proportion of their neighbors about a topic, but usually speak with a small subset of their network about any topic. We explore a model where individuals' opinion is influenced entirely by this subset of their neighbors.
+
+%\bigskip
+%\noindent Individuals take on opinions by following a voting strategy, per time step:
+%\begin{enumerate}
+ %   \item Individuals have some level of momentary awareness about a topic, and speak to some proportion of their neighbors about this topic. We'll call this proportion the "influencers" of some individual.
+  %  \item Individuals follow majority; they take on whatever opinion the majority of their influencers have.
+%\end{enumerate}
+
+%\noindent Our model makes the following assumptions:
+%\begin{enumerate}
+    %\item Vital dynamics are unimportant on our time scale
+    %\item It is possible for all individuals to feel influence from all other individuals (i.e. there are no completely disconnected 'islands', there is a path from any node to any other of some length).
+    %\item Individuals have no predisposition to one idea over another, and there is no fundamental difference between the ideas. 
+%\end{enumerate}
+
+%We examined some previous models on networks for inspiration and guidance in designed our own model. 
+
+%The first models we examined are those outlined by Duncan J. Watts in his paper "A Simple Model of Global Cascades" (Watts, 2002) This paper first informed the choice of a 'voting' strategy; an idea or opinion fundamentally differs from a virus or other infectious contagion in that a single exposure to an idea may not be sufficient to alter an individuals feelings. Watts' paper differs from our approach, as he mostly studies binary-state nodes, and resulting network stability, where as we are curious about many-state (at least 3) nodes. 
+
+%We further explored differing voting strategies, such as those detailed in "Threshold q-Voter Model" (Vieiral and Anteneodo, 2018). This paper does a fantastic job of illustrating the impact of different voter strategies, and different stochastic ('outside') influences, on the final states and time-to-stability of networks. In particular, their exploration of voting proportions and the resulting stability of, or existence of, majority states will be very useful in our decision of the 'awareness' distributions.  
+
+\pagebreak
+\section{Bibliography}
+
+\begin{enumerate}
+    \item Broido, A.D., Clauset, A. Scale-free networks are rare. Nat Commun 10, 1017 (2019). https://doi.org/10.1038/s41467-019-08746-5
+    
+    \item Medvedev, Alexey and Kertesz, Janos. Empirical study of the role of the topology in spreading on communication networks, Physica A: Statistical Mechanics and its Applications, Volume 470, 2017, Pages 12-19, ISSN 0378-4371, https://doi.org/10.1016/j.physa.2016.11.109.
+
+    \item Newman Mark E. J.  The structure and function of complex networks (2003). SIAM Rev. 45, 2 (2003), 167–256. 
+    
+    \item Shah, Devavrat and Zaman, Tauhid, Rumors in a Network: Who’s the Culprit? (2009). Retrieved March, 2022 from \href{https://snap.stanford.edu/nipsgraphs2009/papers/zaman-paper.pdf}{https://snap.stanford.edu/ni psgraphs2009/papers/zaman-paper.pdf}
+    
+    \item Stonedahl, Forrest and Rand, William and Wilensky, Uri, Evolving Viral Marketing Strategies (July 2010). GECCO 2010, Portland, Oregon, USA, July 7-11, 2010 , Robert H. Smith School Research Paper No. RHS 06-133, Available at SSRN: \url{https://ssrn.com/abstract=1846505}
+
+    \item Vieira, A. R., & Anteneodo, C. (2018). Threshold q-voter model. Physical Review E, 97(5). https://doi.org/10.1103/physreve.97.052106
+    
+    \item Watts, D. J. (2002). A simple model of global cascades on random networks. Proceedings of the National Academy of Sciences, 99(9), 5766–5771. https://doi.org/10.1073/pnas.082090499
+\end{enumerate}
+
+
+\end{document}
