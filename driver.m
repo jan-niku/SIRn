@@ -4,16 +4,24 @@
 %% Parameters
 
 % Global
-N = 1000; % try for this many nodes
+N = 350; % try for this many nodes
 PLOT = [1,1];
+USE_SIRn = 1;
+USE_GRAPH = [0, ... % generate from degree distribution
+             1];    % generate a small-world model
+
+% Small world parameters
+% ( N is GLOBAL above ^ )
+K = 350;
+beta = 0;
 
 % CNM
 dist = 'lognormal'; % use 'makedist' to see list of possibles
-sigma2 = 1; % change me based on dist VERY SENSITIVE
+sigma2 = 2; % change me based on dist VERY SENSITIVE
 mu = 1; % change me based on dist SLIGHTLY SENSITIVE
 
 % SIRn
-parents = [1]; % initially infected
+parents = [1,20,40]; % initially infected
 immunized = []; % unused
 r = 0.03; % recovery
 p = 0.03; % infection prob
@@ -21,20 +29,29 @@ num_of_steps = 2000;
 
 %% Generate Network
 disp("Creating degree distribution...")
-pd = makedist(dist,mu,sigma2);
-init_net = zeros(1,N);
-for i = 1:N % build degree dist by prob dist
-    init_net(i) = pd.random;
+
+if USE_GRAPH(1) % CNM
+    pd = makedist(dist,mu,sigma2);
+    init_net = zeros(1,N);
+    for i = 1:N % build degree dist by prob dist
+        init_net(i) = pd.random;
+    end
+    init_net = ceil(init_net); % degrees are ints
+    disp("Building network from distribution...")
+    net = cm_net(init_net); % pass dist to cm for adj mat
 end
-init_net = ceil(init_net); % degrees are ints
-disp("Building network from distribution...")
-net = cm_net(init_net); % pass dist to cm for adj mat
+
+if USE_GRAPH(2)
+    g = WattsStrogatz(N, K, beta); % generate the network
+    net = adjacency(g); % turn it into a network
+end
 
 %% Pass to SIRn
-disp("Beginning simulation...")
-[inf,nisum,rec,infsum] = ...
-    sir_simulation(net,parents,p,immunized,r,num_of_steps);
-
+if USE_SIRn
+    disp("Beginning simulation...")
+    [inf,nisum,rec,infsum] = ...
+        sir_simulation(net,parents,p,immunized,r,num_of_steps);
+end
 %% Plot
 
 disp("Plotting...")
