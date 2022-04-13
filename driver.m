@@ -4,7 +4,7 @@
 %% Parameters
 
 % Global
-N = 350; % try for this many nodes
+N = 2500; % try for this many nodes
 PLOT = [1,1];
 USE_SIRn = 1;
 USE_GRAPH = [0, ... % generate from degree distribution
@@ -12,16 +12,16 @@ USE_GRAPH = [0, ... % generate from degree distribution
 
 % Small world parameters
 % ( N is GLOBAL above ^ )
-K = 350;
+K = 1250;
 beta = 0;
 
 % CNM
 dist = 'lognormal'; % use 'makedist' to see list of possibles
-sigma2 = 2; % change me based on dist VERY SENSITIVE
+sigma2 = 1; % change me based on dist VERY SENSITIVE
 mu = 1; % change me based on dist SLIGHTLY SENSITIVE
 
 % SIRn
-parents = [1,20,40]; % initially infected
+parents = [1]; % initially infected
 immunized = []; % unused
 r = 0.03; % recovery
 p = 0.03; % infection prob
@@ -44,6 +44,7 @@ end
 if USE_GRAPH(2)
     g = WattsStrogatz(N, K, beta); % generate the network
     net = adjacency(g); % turn it into a network
+    init_net = degree(g);
 end
 
 %% Pass to SIRn
@@ -84,9 +85,14 @@ if PLOT(1)
     metrics = exportMetricsFile(graph(net), 'Title','metrics');
     avgAssort = mean(metrics.assortativityByNode);
     avgDegree = mean(init_net);
-    subtitstr = dist+", \mu="+num2str(mu)+...
-                ", \sigma="+num2str(sigma2);
-
+    if USE_GRAPH(1)
+        subtitstr = dist+", \mu="+num2str(mu)+...
+                    ", \sigma="+num2str(sigma2);
+    end
+    if USE_GRAPH(2)
+        subtitstr = "Small World with N="+N+...
+            " and K="+K;
+    end
     subplot(2,2,1)
     plot(graph(net))
     title("Network Visualization")
