@@ -7,8 +7,6 @@ function RETURN_STATUS = MANY_NETWORK_SIR(SAVEDIR, BASENAME, FMT, SIRDIR, ...
 adjmats = dir(fullfile(SAVEDIR,BASENAME+"*"+FMT));
 iters = length(adjmats);
 
-progressbar('running sir...');
-
 for net=1:iters
     progressbar((net+iters)/(2*iters))
 

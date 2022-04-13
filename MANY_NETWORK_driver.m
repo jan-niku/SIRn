@@ -3,9 +3,17 @@
 % will save useful metrics and simulation outcomes as text.
 % optionally will run compartmental sir (?).
 
+% TODO: you can probably get away with saving a lot of 
+%       the initial matrices as sparse, although it may not
+%       make it faster. Give it a go, maybe.
+
+%       probably need to add re-simulations just in case
+
+%       some kind of tool for comparing to sirc?
+
 %% Parameters
 % Global
-N=3000; % number of nodes
+N=1000; % number of nodes
 %f = msgbox("Select a network directory");
 SAVEDIR = uigetdir + "/"; % folder where networks are saved
 %g = msgbox("Select a metric directory");
@@ -18,7 +26,7 @@ FMT = ".txt"; % the format of saving
 % Network
 Kmin=1; % minimum number of connections (over two)
 Kmax=ceil(N/2); % maximum number of connections (over two)
-Kstep=5;
+Kstep=25;
 beta=0; % rewiring (use 0)
 
 % SIR simulation
