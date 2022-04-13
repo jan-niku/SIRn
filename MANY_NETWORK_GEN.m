@@ -24,10 +24,8 @@ function RETURN_STATUS = MANY_NETWORK_GEN(N, ...
 karr = Kmin:Kstep:Kmax;
 iters = length(karr);
 
-progressbar('generating networks...')
-
 for k=1:iters
-    progressbar(k/iters) % gives some indication to user
+    progressbar(k/(iters*2)) % gives some indication to user
 
     % generate small world model
     sm = WattsStrogatz(N, karr(k), beta);

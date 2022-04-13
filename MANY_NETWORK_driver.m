@@ -5,12 +5,12 @@
 
 %% Parameters
 % Global
-N=5000; % number of nodes
-f = msgbox("Select a network directory");
+N=3000; % number of nodes
+%f = msgbox("Select a network directory");
 SAVEDIR = uigetdir + "/"; % folder where networks are saved
-g = msgbox("Select a metric directory");
+%g = msgbox("Select a metric directory");
 METDIR = uigetdir + "/"; % place to keep metrics
-h = msgbox("Select a simulation directory");
+%h = msgbox("Select a simulation directory");
 SIRDIR = uigetdir + "/";
 BASENAME = "smallworld"; % the basename onto which k's are appended
 FMT = ".txt"; % the format of saving
@@ -18,15 +18,16 @@ FMT = ".txt"; % the format of saving
 % Network
 Kmin=1; % minimum number of connections (over two)
 Kmax=ceil(N/2); % maximum number of connections (over two)
-Kstep=1;
+Kstep=5;
 beta=0; % rewiring (use 0)
 
 % SIR simulation
-r = 0.03; % recovery rate
-p = 0.03; % infectivity
+r = 0.05; % recovery
+p = 0.005; % infection prob
 max_iters = 2000; % maximum iterations of simulation
 parent_prop = 0.03; % proportion of network as parents
 
+progressbar('generating networks...')
 MANY_NETWORK_GEN(N, ...
     Kmin, Kmax, Kstep, beta, ...
     SAVEDIR, BASENAME, FMT, METDIR)

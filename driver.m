@@ -23,8 +23,8 @@ mu = 1; % change me based on dist SLIGHTLY SENSITIVE
 % SIRn
 parents = [1]; % initially infected
 immunized = []; % unused
-r = 0.03; % recovery
-p = 0.03; % infection prob
+r = 0.05; % recovery
+p = 0.015; % infection prob
 num_of_steps = 2000;
 
 %% Generate Network

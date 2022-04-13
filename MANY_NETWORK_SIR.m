@@ -10,7 +10,7 @@ iters = length(adjmats);
 progressbar('running sir...');
 
 for net=1:iters
-    progressbar(net/iters)
+    progressbar((net+iters)/(2*iters))
 
     % load the matrix into a network
     curmat = adjmats(net).name; % grab the filename
@@ -29,7 +29,7 @@ for net=1:iters
     % we need: rec, nisum, infsum, inf
     % these should be named like the network
     % and output in a single file in a new dir
-    sirvecs = [inf nisum rec infsum];
+    sirvecs = [inf; nisum; rec; infsum];
     SIRFILE = "sim"+curnum;
     SIMPATH = SIRDIR+SIRFILE;
     writematrix(sirvecs, SIMPATH);
