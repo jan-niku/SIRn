@@ -36,5 +36,6 @@ MANY_NETWORK_GEN(N, ...
 num_parents = ceil(N*parent_prop);
 parents = randi(N,1,num_parents);
 
+progressbar('running sir...')
 MANY_NETWORK_SIR(SAVEDIR, BASENAME, FMT, SIRDIR, ...
     N, r, p, max_iters, parents)
