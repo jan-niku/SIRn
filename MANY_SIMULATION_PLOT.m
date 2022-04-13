@@ -20,3 +20,4 @@ compartments = find(compartments); % grab idx of nonzero
 
 Series = sim_grabber(simulation_numbers, compartments, SIRDIR);
 
+   
