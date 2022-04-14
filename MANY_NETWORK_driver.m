@@ -72,8 +72,6 @@ switch answer
             Kmin, Kmax, Kstep, beta, ...
             SAVEDIR, BASENAME, FMT, METDIR);
 
-        % Generate Parents
-
         progressbar('running sir...')
         MANY_NETWORK_SIR(SAVEDIR, BASENAME, FMT, SIRDIR, ...
             N, r, p, max_iters, parents)

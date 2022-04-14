@@ -36,16 +36,16 @@ end
 U = U';
 t = t';
 
-answer = questdlg('What do you want to plot?', ...
-    'Plot Dialog', ...
-    'K vs. Maximum New Infections', ...
-    'K vs. Iteration of Max New Infections', ...
-    'Network Max Infections vs. SIRc Max Infections', ...
-    'gif test', ...
-    'K vs. Iteration of Max New Infections');
+%% Menu
+msg = "What do you want to plot?";
+opts = ["K vs. Maximum New Infections" ...
+        "K vs. Iteration of Max New Infections" ...
+        "Network Max Infections vs. SIRc Max Infections" ...
+        "(Animated) Network Converge to Compartmental"];
+choice = menu(msg,opts);
 
-switch answer
-    case 'K vs. Maximum New Infections'
+switch choice
+    case 1
         plot(karr,max_new_inf)
         title('K value vs. Maximum New Infections')
         subtitle("N="+N)
@@ -53,7 +53,7 @@ switch answer
         xlabel("K-value")
         ylabel("Maximum New Infections")
         
-    case 'K vs. Iteration of Max New Infections'
+    case 2
         plot(karr,max_new_inf_idx)
         title('K vs. Iteration of Max New Infections')
         subtitle("N="+N)
@@ -61,7 +61,7 @@ switch answer
         xlabel("K-value")
         ylabel("Index of Maximum Infection")
 
-    case 'Network Max Infections vs. SIRc Max Infections'
+    case 3
         plot(karr, max_inf)
         xlim([0 max(karr)])
         ylim([0 SIRc_max_inf*1.2])
@@ -71,8 +71,33 @@ switch answer
         xlabel("K-value")
         ylabel("Maximum Infected")
 
-    case 'gif test'
-        
+    case 4
+        kprop = karr/N; % K as a proportion of N
+        plot(Series{1,1,1})
+        hold on
+        plot(t+1,U(2,:))
+        hold off
+        title("Infected; Compartmental vs. Networked")
+        subtitle("K proportion: " + kprop(1))
+        xlabel("Time")
+        ylabel("Infected")
+        xlim([0 200])
+        ylim([0 1500])
+        gif('test.gif','overwrite',true)
+        for idx=2:sers
+            plot(Series{1,1,idx})
+            hold on
+            plot(t+1,U(2,:))
+            hold off
+            title("Infected; Compartmental vs. Networked")
+            subtitle("K proportion: " + kprop(idx))
+            xlabel("Time")
+            ylabel("Infected")
+            xlim([0 200])
+            ylim([0 1500])
+            gif
+        end
+
 
 end
 
