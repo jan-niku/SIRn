@@ -11,6 +11,10 @@ Series = sim_grabber(sim_first, sim_step, sim_last, ...
     compartments, SIRDIR);
 [comps, ~, sers] = size(Series); % cols, the middle, always 1
 
+% inputs are the wrong dimension
+%U = U';
+%t = t';
+
 % populate infected arrays
 max_inf = zeros(1,sers);
 max_inf_idx = zeros(1,sers);
@@ -31,10 +35,6 @@ for idx=1:sers
     max_new_inf(idx) = run_max;
     max_new_inf_idx(idx) = run_idx;
 end
-
-% inputs are the wrong dimension
-U = U';
-t = t';
 
 %% Menu
 msg = "What do you want to plot?";
