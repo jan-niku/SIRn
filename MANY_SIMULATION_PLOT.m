@@ -1,7 +1,8 @@
 % Experimental code for plotting many simulations at once
 
 function ret = MANY_SIMULATION_PLOT(SIRDIR, ...
-    compartments, GIFNAME, N, karr, t, U)
+    compartments, GIFNAME, N, karr, t, U, ...
+    U0, r, p, tin)
 
 % get the series
 sim_first = 1;
@@ -41,7 +42,9 @@ msg = "What do you want to plot?";
 opts = ["K vs. Maximum New Infections" ...
         "K vs. Iteration of Max New Infections" ...
         "Network Max Infections vs. SIRc Max Infections" ...
-        "(Animated) Network Converge to Compartmental"];
+        "(Animated) Network Converge to Compartmental" ...
+        "(Animated) Reverse Convergence Gif"];
+        
 choice = menu(msg,opts);
 
 switch choice
@@ -83,7 +86,7 @@ switch choice
         ylabel("Infected")
         xlim([0 200])
         ylim([0 1500])
-        gif('test.gif','overwrite',true)
+        gif(GIFNAME,'overwrite',true)
         for idx=2:sers
             plot(Series{1,1,idx})
             hold on
@@ -94,10 +97,31 @@ switch choice
             xlabel("Time")
             ylabel("Infected")
             xlim([0 200])
-            ylim([0 1500])
+            ylim([0 N])
             gif
         end
 
+    case 5
+%        inputs = inputdlg({'r min', 'r step', 'r max'}, ...
+%            'Parameter Input');
+        [tarr, max_I, max_I_idx, Is, iters] = MANY_SIRc_GEN(tin, U0, ...
+            p, 0.001,0.001,0.1);
+%            str2num(inputs{1}), ...
+%            str2num(inputs{2}), ...
+%            str2num(inputs{3}));
+        plot(tarr{1}, Is{1})
+        ylim([0 N])
+        xlim([0 200])
+        gif('delete.gif','overwrite',true)
+        for idx=1:iters
+            plot(tarr{idx},Is{idx})
+            ylim([0 N])
+            xlim([0 200])
+            gif
+        end
+
+        max_I;
+        max_I_idx;
 
 end
 

@@ -13,27 +13,27 @@
 
 %% Parameters
 % Global
-N=1500; % number of nodes
+N=750; % number of nodes
 if ~(exist(SAVEDIR) & exist(METDIR) & exist(SIRDIR))
     %f = msgbox("Select a network directory");
-    SAVEDIR = uigetdir + "/"; % folder where networks are saved
+    SAVEDIR = uigetdir + "\"; % folder where networks are saved
     %g = msgbox("Select a metric directory");
-    METDIR = uigetdir + "/"; % place to keep metrics
+    METDIR = uigetdir + "\"; % place to keep metrics
     %h = msgbox("Select a simulation directory");
-    SIRDIR = uigetdir + "/";
+    SIRDIR = uigetdir + "\";
     BASENAME = "smallworld"; % the basename onto which k's are appended
     FMT = ".txt"; % the format of saving
 end
 
 % Network
 Kmin=1; % minimum number of connections (over two)
-Kmax=ceil(N/2); % maximum number of connections (over two)
-Kstep=25;
+Kmax=ceil(N/2)+1; % maximum number of connections (over two)
+Kstep=10;
 karr = Kmin:Kstep:Kmax;
-beta=0; % rewiring (use 0)
+beta=.25; % rewiring (use 0)
 
 % SIR simulation
-r = 0.03; % recovery
+r = 0.15; % recovery
 p = 0.0005; % infection prob
 max_iters = 2000; % maximum iterations of simulation
 parent_prop = 0.05; % proportion of network as parents
@@ -44,7 +44,9 @@ parents = randi(N,1,num_parents);
 S0 = N-length(parents);
 I0 = length(parents);
 R0 = 0;
-[SIRc_tspan, SIRc_U] = SIRc_main([0 200], [S0 I0 R0], p, r);
+U0 = [S0 I0 R0];
+tin = [0 200];
+[SIRc_tspan, SIRc_U] = SIRc_main(tin, U0, p, r);
 SIRc_tspan = SIRc_tspan';
 SIRc_U = SIRc_U';
 % Plotting
@@ -54,7 +56,8 @@ compartments = [1, ... % infected
                 1, ... % new infected
                 1, ... % recovered
                 1];    % cumulative infected
-GIFNAME = "test.gif";
+GIFNAME = "convergence.gif";
+
 
 %% Runtime
 answer = questdlg('Do you want to generate networks?', ...
@@ -85,5 +88,6 @@ switch answer
     case 'No, just plot'
 
         MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
-            N, karr, SIRc_tspan, SIRc_U);
+            N, karr, SIRc_tspan, SIRc_U, ...
+            U0, r, p, tin);
 end

@@ -28,7 +28,7 @@ for net=1:iters
     % these should be named like the network
     % and output in a single file in a new dir
     sirvecs = [inf; nisum; rec; infsum];
-    SIRFILE = "sim"+curnum;
+    SIRFILE = "sim"+curnum(1);
     SIMPATH = SIRDIR+SIRFILE;
     writematrix(sirvecs, SIMPATH);
 
