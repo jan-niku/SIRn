@@ -3,7 +3,12 @@
 % and an array of the compartments you want output
 % it returns a cell of outputs
 
-function Series = sim_grabber(simulation_numbers, compartments, SIRDIR)
+function Series = sim_grabber(sim_first, sim_step, sim_last, ...
+    compartments, SIRDIR)
+    
+    % Generate the simulation and compartments array
+    simulation_numbers = sim_first:sim_step:sim_last;
+    compartments = find(compartments); % grab idx of nonzero
 
     % build cell
     qty_simulations = length(simulation_numbers);

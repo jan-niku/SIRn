@@ -5,7 +5,7 @@
 % return status:
 % -7: User wishes not to overwrite directory
 
-function RETURN_STATUS = MANY_NETWORK_GEN(N, ...
+function karr = MANY_NETWORK_GEN(N, ...
     Kmin, Kmax, Kstep, beta, ...
     SAVEDIR, BASENAME, FMT, METDIR)
 
@@ -47,8 +47,6 @@ for k=1:iters
     writematrix(sadj,FILEPATH);
 
 end
-
 % weve done everything now
-RETURN_STATUS=0;
 return
 end

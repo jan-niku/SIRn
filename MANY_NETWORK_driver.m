@@ -13,20 +13,21 @@
 
 %% Parameters
 % Global
-N=1000; % number of nodes
+N=1500; % number of nodes
 %f = msgbox("Select a network directory");
-SAVEDIR = uigetdir + "/"; % folder where networks are saved
+%SAVEDIR = uigetdir + "/"; % folder where networks are saved
 %g = msgbox("Select a metric directory");
-METDIR = uigetdir + "/"; % place to keep metrics
+%METDIR = uigetdir + "/"; % place to keep metrics
 %h = msgbox("Select a simulation directory");
-SIRDIR = uigetdir + "/";
+%SIRDIR = uigetdir + "/";
 BASENAME = "smallworld"; % the basename onto which k's are appended
 FMT = ".txt"; % the format of saving
 
 % Network
 Kmin=1; % minimum number of connections (over two)
 Kmax=ceil(N/2); % maximum number of connections (over two)
-Kstep=25;
+Kstep=5;
+karr = Kmin:Kstep:Kmax;
 beta=0; % rewiring (use 0)
 
 % SIR simulation
@@ -34,16 +35,54 @@ r = 0.05; % recovery
 p = 0.005; % infection prob
 max_iters = 2000; % maximum iterations of simulation
 parent_prop = 0.03; % proportion of network as parents
-
-progressbar('generating networks...')
-MANY_NETWORK_GEN(N, ...
-    Kmin, Kmax, Kstep, beta, ...
-    SAVEDIR, BASENAME, FMT, METDIR)
-
-% Generate Parents
 num_parents = ceil(N*parent_prop);
 parents = randi(N,1,num_parents);
 
-progressbar('running sir...')
-MANY_NETWORK_SIR(SAVEDIR, BASENAME, FMT, SIRDIR, ...
-    N, r, p, max_iters, parents)
+% Run SIRc to populate
+S0 = N-length(parents);
+I0 = length(parents);
+R0 = 0;
+[SIRc_tspan, SIRc_U] = SIRc_main([0 200], [S0 I0 R0], p, r);
+
+% Plotting
+% IT IS BEST NOT TO CHANGE THE FOLLOWING ARRAY
+% UNLESS YOU WANT TO DEBUG MANY_SIM.._PLOT.m
+compartments = [1, ... % infected
+                1, ... % new infected
+                1, ... % recovered
+                1];    % cumulative infected
+GIFNAME = "test.gif";
+
+%% Runtime
+answer = questdlg('Do you want to generate networks?', ...
+    'Runtime', ...
+    'Yes, and plot', ...
+    'No, just plot', ...
+    'No, just plot'); % default to not overwriting
+
+switch answer
+    case 'Yes, and plot'
+        % clear all old files
+        delete(SIRDIR + "*txt");
+        delete(SAVEDIR + "*" + FMT);
+        delete(METDIR + "*txt");
+
+        progressbar('generating networks...')
+        MANY_NETWORK_GEN(N, ...
+            Kmin, Kmax, Kstep, beta, ...
+            SAVEDIR, BASENAME, FMT, METDIR);
+
+        % Generate Parents
+
+        progressbar('running sir...')
+        MANY_NETWORK_SIR(SAVEDIR, BASENAME, FMT, SIRDIR, ...
+            N, r, p, max_iters, parents)
+
+        MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
+            N, karr);
+
+    case 'No, just plot'
+
+        MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
+            N, karr, SIRc_tspan, SIRc_U);
+end
