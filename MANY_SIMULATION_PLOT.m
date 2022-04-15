@@ -43,7 +43,8 @@ opts = ["K vs. Maximum New Infections" ...
         "K vs. Iteration of Max New Infections" ...
         "Network Max Infections vs. SIRc Max Infections" ...
         "(Animated) Network Converge to Compartmental" ...
-        "(Animated) Reverse Convergence Gif"];
+        "(Animated) Reverse Convergence Gif" ...
+        "Clustering Coefficient vs. r-Compensation"];
         
 choice = menu(msg,opts);
 
@@ -102,20 +103,15 @@ switch choice
         end
 
     case 5
-%       inputs = inputdlg({'r min', 'r step', 'r max'}, ...
-%           'Parameter Input');
         rmin = r/50;
         rstep=r/200;
         rmax=r;
        progressbar('Generating SIRc Outcomes')
         [tarr, max_I, max_I_idx, Is, iters] = MANY_SIRc_GEN(tin, U0, ...
             q, rmin, rstep, rmax);
-%            str2num(inputs{1}), ...
-%            str2num(inputs{2}), ...
-%            str2num(inputs{3}));
         plot(tarr{1}, Is{1})
         hold on
-        plot(Series{1,1,sers*.7})
+        plot(Series{1,1,sers*.65})
         hold off
         ylim([0 N])
         xlim([0 50])
@@ -129,9 +125,5 @@ switch choice
             xlim([0 200])
             gif
         end
-
-        max_I;
-        max_I_idx;
-
 end
 
