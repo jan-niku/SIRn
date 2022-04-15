@@ -2,7 +2,7 @@
 
 function ret = MANY_SIMULATION_PLOT(SIRDIR, ...
     compartments, GIFNAME, N, karr, t, U, ...
-    U0, r, p, tin)
+    U0, q, r, tin)
 
 % get the series
 sim_first = 1;
@@ -85,8 +85,8 @@ switch choice
         xlabel("Time")
         ylabel("Infected")
         xlim([0 200])
-        ylim([0 1500])
-        gif(GIFNAME,'overwrite',true)
+        ylim([0 N])
+        gif('convergence.gif','overwrite',true)
         for idx=2:sers
             plot(Series{1,1,idx})
             hold on
@@ -102,19 +102,29 @@ switch choice
         end
 
     case 5
-%        inputs = inputdlg({'r min', 'r step', 'r max'}, ...
-%            'Parameter Input');
+%       inputs = inputdlg({'r min', 'r step', 'r max'}, ...
+%           'Parameter Input');
+        rmin = r/50;
+        rstep=r/200;
+        rmax=r;
+       progressbar('Generating SIRc Outcomes')
         [tarr, max_I, max_I_idx, Is, iters] = MANY_SIRc_GEN(tin, U0, ...
-            p, 0.001,0.001,0.1);
+            q, rmin, rstep, rmax);
 %            str2num(inputs{1}), ...
 %            str2num(inputs{2}), ...
 %            str2num(inputs{3}));
         plot(tarr{1}, Is{1})
+        hold on
+        plot(Series{1,1,sers*.7})
+        hold off
         ylim([0 N])
-        xlim([0 200])
+        xlim([0 50])
         gif('delete.gif','overwrite',true)
         for idx=1:iters
             plot(tarr{idx},Is{idx})
+            hold on
+            plot(Series{1,1,sers*.65})
+            hold off
             ylim([0 N])
             xlim([0 200])
             gif

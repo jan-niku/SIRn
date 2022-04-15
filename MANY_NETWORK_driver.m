@@ -13,30 +13,37 @@
 
 %% Parameters
 % Global
-N=750; % number of nodes
-if ~(exist(SAVEDIR) & exist(METDIR) & exist(SIRDIR))
-    %f = msgbox("Select a network directory");
-    SAVEDIR = uigetdir + "\"; % folder where networks are saved
-    %g = msgbox("Select a metric directory");
-    METDIR = uigetdir + "\"; % place to keep metrics
-    %h = msgbox("Select a simulation directory");
-    SIRDIR = uigetdir + "\";
-    BASENAME = "smallworld"; % the basename onto which k's are appended
-    FMT = ".txt"; % the format of saving
+N=1000; % number of nodes
+% ask about directiories
+msg = "How should we handle saving?";
+opts = ["Use Environment Variables for Paths (deletes old simulation)" ...
+    "Set Directories (I don't want to delete anything)"];
+choice = menu(msg,opts);
+
+switch choice
+    case 2
+        SAVEDIR = uigetdir + "\"; % folder where networks are saved
+        METDIR = uigetdir + "\"; % place to keep metrics
+        SIRDIR = uigetdir + "\";
+        BASENAME = "smallworld"; % the basename onto which k's are appended
+        FMT = ".txt"; % the format of saving
+
+    case 1
+        % do nothing
 end
 
 % Network
-Kmin=1; % minimum number of connections (over two)
+Kmin=floor(log(N)); % minimum number of connections (over two)
 Kmax=ceil(N/2)+1; % maximum number of connections (over two)
-Kstep=10;
+Kstep=5;
 karr = Kmin:Kstep:Kmax;
 beta=.25; % rewiring (use 0)
 
 % SIR simulation
-r = 0.15; % recovery
-p = 0.0005; % infection prob
+q = 0.083; % recovery
+r = 0.0004; % infection prob
 max_iters = 2000; % maximum iterations of simulation
-parent_prop = 0.05; % proportion of network as parents
+parent_prop = 0.005; % proportion of network as parents
 num_parents = ceil(N*parent_prop);
 parents = randi(N,1,num_parents);
 
@@ -46,7 +53,7 @@ I0 = length(parents);
 R0 = 0;
 U0 = [S0 I0 R0];
 tin = [0 200];
-[SIRc_tspan, SIRc_U] = SIRc_main(tin, U0, p, r);
+[SIRc_tspan, SIRc_U] = SIRc_main(tin, U0, r, q);
 SIRc_tspan = SIRc_tspan';
 SIRc_U = SIRc_U';
 % Plotting
@@ -80,7 +87,7 @@ switch answer
 
         progressbar('running sir...')
         MANY_NETWORK_SIR(SAVEDIR, BASENAME, FMT, SIRDIR, ...
-            N, r, p, max_iters, parents)
+            N, q, r, max_iters, parents)
 
         MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
             N, karr, SIRc_tspan, SIRc_U);
@@ -89,5 +96,5 @@ switch answer
 
         MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
             N, karr, SIRc_tspan, SIRc_U, ...
-            U0, r, p, tin);
+            U0, q, r, tin);
 end

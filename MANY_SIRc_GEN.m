@@ -2,8 +2,8 @@
 %% This function will return a cell of infection arrays
 % these will be time series infections from varying r in a sir simulation
 
-function [tarr, max_I, max_I_idx, Is, iters] = MANY_SIRc_GEN(tin, U0, p, ...
-    rmin, rstep, rmax)
+function [tarr, max_I, max_I_idx, Is, iters] = MANY_SIRc_GEN(tin, U0,...
+q, rmin, rstep, rmax)
 
 rarr = rmin:rstep:rmax;
 iters = length(rarr);
@@ -13,7 +13,8 @@ max_I_idx = zeros(1,iters);
 Is = cell(1,1,iters);
 
 for i=1:iters
-    [t,U] = SIRc_main(tin, U0, rarr(i),.15);
+    progressbar(i/iters)
+    [t,U] = SIRc_main(tin, U0, rarr(i),q);
     t = t';
     U = U';
 
