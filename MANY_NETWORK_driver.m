@@ -15,9 +15,10 @@
 % Global
 N=1000; % number of nodes
 % ask about directiories
-msg = "How should we handle saving?";
+msg = "How should we handle saving? (if generating networks)";
 opts = ["Use Environment Variables for Paths (deletes old simulation)" ...
-    "Set Directories (I don't want to delete anything)"];
+    "Set Directories (I don't want to delete anything)" ...
+    "I just want to plot"];
 choice = menu(msg,opts);
 
 switch choice
@@ -28,8 +29,23 @@ switch choice
         BASENAME = "smallworld"; % the basename onto which k's are appended
         FMT = ".txt"; % the format of saving
 
+        answer = questdlg('Do you want to generate networks?', ...
+            'Runtime', ...
+            'Yes, and plot', ...
+            'No, just plot', ...
+            'No, just plot'); % default to not overwriting
+
+
     case 1
-        % do nothing
+        answer = questdlg('Do you want to generate networks?', ...
+            'Runtime', ...
+            'Yes, and plot', ...
+            'No, just plot', ...
+            'No, just plot'); % default to not overwriting
+
+
+    case 3
+        answer = 'No, just plot';
 end
 
 % Network
@@ -67,11 +83,6 @@ GIFNAME = "convergence.gif";
 
 
 %% Runtime
-answer = questdlg('Do you want to generate networks?', ...
-    'Runtime', ...
-    'Yes, and plot', ...
-    'No, just plot', ...
-    'No, just plot'); % default to not overwriting
 
 switch answer
     case 'Yes, and plot'

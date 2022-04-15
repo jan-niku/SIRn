@@ -85,7 +85,7 @@ switch choice
         subtitle("K proportion: " + kprop(1))
         xlabel("Time")
         ylabel("Infected")
-        xlim([0 200])
+        xlim([0 100])
         ylim([0 N])
         gif('convergence.gif','overwrite',true)
         for idx=2:sers
@@ -97,7 +97,7 @@ switch choice
             subtitle("K proportion: " + kprop(idx))
             xlabel("Time")
             ylabel("Infected")
-            xlim([0 200])
+            xlim([0 100])
             ylim([0 N])
             gif
         end
@@ -114,7 +114,7 @@ switch choice
         plot(Series{1,1,sers*.65})
         hold off
         ylim([0 N])
-        xlim([0 50])
+        xlim([0 75])
         gif('delete.gif','overwrite',true)
         for idx=1:iters
             plot(tarr{idx},Is{idx})
@@ -122,8 +122,9 @@ switch choice
             plot(Series{1,1,sers*.65})
             hold off
             ylim([0 N])
-            xlim([0 200])
+            xlim([0 75])
             gif
         end
 end
+
 
