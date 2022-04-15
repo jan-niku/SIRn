@@ -63,6 +63,9 @@ parent_prop = 0.005; % proportion of network as parents
 num_parents = ceil(N*parent_prop);
 parents = randi(N,1,num_parents);
 
+% params for SIRn
+immunized = [];
+
 % Run SIRc to populate
 S0 = N-length(parents);
 I0 = length(parents);
@@ -94,11 +97,8 @@ switch answer
         progressbar('generating networks...')
         MANY_NETWORK_GEN(N, ...
             Kmin, Kmax, Kstep, beta, ...
-            SAVEDIR, BASENAME, FMT, METDIR);
-
-        progressbar('running sir...')
-        MANY_NETWORK_SIR(SAVEDIR, BASENAME, FMT, SIRDIR, ...
-            N, q, r, max_iters, parents)
+            SAVEDIR, BASENAME, FMT, METDIR, ...
+            parents,q,r,immunized,max_iters, SIRDIR);
 
         MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
             N, karr, SIRc_tspan, SIRc_U);
