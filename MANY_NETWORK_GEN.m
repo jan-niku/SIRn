@@ -9,20 +9,14 @@ function karr = MANY_NETWORK_GEN(N, ...
     Kmin, Kmax, Kstep, beta, ...
     SAVEDIR, BASENAME, FMT, METDIR)
 
-% check if we want to destroy a bunch of data
-% if exist(SAVEDIR,'dir')
-%     fig = uifigure;
-%     sel = uiconfirm(fig,"Directory exists. Overwrite?",...
-%         "warning","Icon","warning");
-%     if sel ~= "OK"
-%         RETURN_STATUS = -7;
-%         return
-%     end
-% end
 
 % create our K-array
 karr = Kmin:Kstep:Kmax;
 iters = length(karr);
+
+% array to hold metrics
+METRICS = zeros(2,iters);
+METFILE = METDIR+"metrics.txt";
 
 for k=1:iters
     progressbar(k/(iters*2)) % gives some indication to user
@@ -38,15 +32,19 @@ for k=1:iters
     FILENAME = BASENAME+kstring+FMT;
     FILEPATH = SAVEDIR + FILENAME;
 
-    METFILE = "metrics"+kstring; % it adds .txt for us
-    METPATH = METDIR+METFILE;
-    METPATH = convertStringsToChars(METPATH);
-    exportMetricsFile(sm, 'Title', METPATH);
+    %METFILE = "metrics"+kstring; % it adds .txt for us
+    %METPATH = METDIR+METFILE;
+    %METPATH = convertStringsToChars(METPATH);
+    %exportMetricsFile(sm, 'Title', METPATH);
+    mt = getGraphMetrics(sm);
+    METRICS(1,k) = mt.avgClustering;
+    METRICS(2,k) = mt.avgPathLength;
 
     % output to file
     writematrix(sadj,FILEPATH);
 
 end
+writematrix(METRICS, METFILE);
 % weve done everything now
 return
 end

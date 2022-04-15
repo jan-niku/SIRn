@@ -53,8 +53,8 @@ if USE_SIRn
     [inf,nisum,rec,infsum] = ...
         sir_simulation(net,parents,p,immunized,r,num_of_steps);
 end
-%% Plot
 
+%% Plot
 disp("Plotting...")
 % SIRn stuff
 if PLOT(2)

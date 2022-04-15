@@ -2,7 +2,7 @@
 
 function ret = MANY_SIMULATION_PLOT(SIRDIR, ...
     compartments, GIFNAME, N, karr, t, U, ...
-    U0, q, r, tin)
+    U0, q, r, tin, METDIR)
 
 % get the series
 sim_first = 1;
@@ -103,10 +103,10 @@ switch choice
         end
 
     case 5
-        rmin = r/50;
+        rmin=r/50;
         rstep=r/200;
         rmax=r;
-       progressbar('Generating SIRc Outcomes')
+        progressbar('Generating SIRc Outcomes')
         [tarr, max_I, max_I_idx, Is, iters] = MANY_SIRc_GEN(tin, U0, ...
             q, rmin, rstep, rmax);
         plot(tarr{1}, Is{1})
@@ -125,6 +125,12 @@ switch choice
             xlim([0 75])
             gif
         end
+
+    case 6
+
+
+
+
 end
 
 

@@ -107,5 +107,5 @@ switch answer
 
         MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
             N, karr, SIRc_tspan, SIRc_U, ...
-            U0, q, r, tin);
+            U0, q, r, tin, METDIR);
 end
