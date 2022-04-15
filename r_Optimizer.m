@@ -1,4 +1,4 @@
-% optimizer for r
+%optimizer for r
 %% This function will take in an array of I's from SIRc
 %% and an array from SIRn, and will try out a range of r values
 %% to minimize some cost function.
@@ -26,12 +26,14 @@ for j=1:outer_iters
 
     for i=1:inner_iters
         r = rarr(i);
-        [t,U] = SIRc_main(tin, U0, q, r);
+        [t,U] = SIRc_main(tin, U0, r, q);
         t = t';
         U = U';
         [M,I]= max(U(2,:));
-        pt = [I,M]; % where our max is
+        pt = [I M]; % where our max is
+
         dist = norm(pt-opt);
+        %dist=abs(pt(1)-opt(1));
         if dist < mindist
             mindist = dist;
             bestr = r;
@@ -40,7 +42,6 @@ for j=1:outer_iters
 
     bestrs(j) = bestr;
     dists(j) = dist;
-
 end
 
 end

@@ -38,10 +38,13 @@ for idx=1:sers
 end
 
 % We need some stuff for 5 and 6 into SIRc for r-optimizing
-rmin=r/50;
-rstep=r/200;
+rmin=r/100;
+rstep=r/100;
 rmax=r;
 rarr=rmin:rstep:rmax;
+
+% grab the metrics
+metrics = readmatrix(METDIR+"metrics.txt");
 
 %% Menu
 msg = "What do you want to plot?";
@@ -118,6 +121,12 @@ switch choice
         hold off
         ylim([0 N])
         xlim([0 75])
+        title("Adjusting r to fit networked model")
+        rcompstr = sprintf('%01.04f',rarr(1)/r);
+        subtitle("r Compensation: "+rcompstr);
+        xlabel("Time")
+        ylabel("Infected")
+        legend("Network Model", "Compartmental Model")
         gif('delete.gif','overwrite',true)
         for idx=1:iters
             plot(tarr{idx},Is{idx})
@@ -128,6 +137,12 @@ switch choice
             hold off
             ylim([0 N])
             xlim([0 75])
+            title("Adjusting r to fit networked model")
+            rcompstr = sprintf('%01.04f',rarr(idx)/r);
+            subtitle("r Compensation: "+rcompstr);
+            xlabel("Time")
+            ylabel("Infected")
+            legend("Network Model", "Compartmental Model")
             gif
         end
 
@@ -137,8 +152,11 @@ switch choice
             max_inf, max_inf_idx);
         bestrs = bestrs/r;
         outopt = [bestrs, dists];
-        writematrix(optout,METDIR+"opt_metrics.txt")
-        plot(bestrs,dists)
+        writematrix(outopt,METDIR+"opt_metrics.txt")
+        scatter(metrics(1,:),bestrs,80,dists,'filled')
+        colormap('turbo')
+        colorbar
+        title("r-Compensation vs. Cluster Coefficient")
 
 
 
