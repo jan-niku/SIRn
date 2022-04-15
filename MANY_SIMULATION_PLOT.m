@@ -37,6 +37,12 @@ for idx=1:sers
     max_new_inf_idx(idx) = run_idx;
 end
 
+% We need some stuff for 5 and 6 into SIRc for r-optimizing
+rmin=r/50;
+rstep=r/200;
+rmax=r;
+rarr=rmin:rstep:rmax;
+
 %% Menu
 msg = "What do you want to plot?";
 opts = ["K vs. Maximum New Infections" ...
@@ -103,15 +109,12 @@ switch choice
         end
 
     case 5
-        rmin=r/50;
-        rstep=r/200;
-        rmax=r;
         progressbar('Generating SIRc Outcomes')
         [tarr, max_I, max_I_idx, Is, iters] = MANY_SIRc_GEN(tin, U0, ...
             q, rmin, rstep, rmax);
         plot(tarr{1}, Is{1})
         hold on
-        plot(Series{1,1,sers*.65})
+        plot(Series{1,1,ceil(sers*.65)})
         hold off
         ylim([0 N])
         xlim([0 75])
@@ -119,7 +122,9 @@ switch choice
         for idx=1:iters
             plot(tarr{idx},Is{idx})
             hold on
-            plot(Series{1,1,sers*.65})
+            % ceil sers*.65 means
+            % grab about 65% of the way into the series
+            plot(Series{1,1,ceil(sers*.65)})
             hold off
             ylim([0 N])
             xlim([0 75])
@@ -127,6 +132,13 @@ switch choice
         end
 
     case 6
+        % run r optimizer
+        [bestrs, dists] = r_Optimizer(rarr, q, tin, U0, ...
+            max_inf, max_inf_idx);
+        bestrs = bestrs/r;
+        outopt = [bestrs, dists];
+        writematrix(optout,METDIR+"opt_metrics.txt")
+        plot(bestrs,dists)
 
 
 

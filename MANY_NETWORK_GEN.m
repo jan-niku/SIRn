@@ -1,7 +1,5 @@
 % network generator code
 
-% TODO: how do we get metrics out?
-
 % return status:
 % -7: User wishes not to overwrite directory
 
