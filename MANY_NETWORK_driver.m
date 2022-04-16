@@ -13,7 +13,7 @@
 
 %% Parameters
 % Global
-N=1000; % number of nodes
+N=1500; % number of nodes
 % ask about directiories
 msg = "How should we handle saving? (if generating networks)";
 opts = ["Use Environment Variables for Paths (deletes old simulation)" ...
@@ -53,7 +53,7 @@ Kmin=floor(log(N)); % minimum number of connections (over two)
 Kmax=ceil(N/2)+1; % maximum number of connections (over two)
 Kstep=5;
 karr = Kmin:Kstep:Kmax;
-beta=.25; % rewiring (use 0)
+beta=.2; % rewiring (use 0)
 
 % SIR simulation
 q = 0.083; % recovery

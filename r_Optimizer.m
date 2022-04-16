@@ -23,6 +23,7 @@ for j=1:outer_iters
 
     mindist = 10000;
     bestr = 0;
+    dist = 10000;
 
     for i=1:inner_iters
         r = rarr(i);
@@ -34,14 +35,17 @@ for j=1:outer_iters
 
         dist = norm(pt-opt);
         %dist=abs(pt(1)-opt(1));
+
         if dist < mindist
             mindist = dist;
             bestr = r;
+        else
+            break
         end
     end
 
     bestrs(j) = bestr;
-    dists(j) = dist;
+    dists(j) = mindist;
 end
 
 end

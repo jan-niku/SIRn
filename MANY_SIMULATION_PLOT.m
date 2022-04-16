@@ -38,8 +38,8 @@ for idx=1:sers
 end
 
 % We need some stuff for 5 and 6 into SIRc for r-optimizing
-rmin=r/100;
-rstep=r/100;
+rmin=r/500;
+rstep=r/1000;
 rmax=r;
 rarr=rmin:rstep:rmax;
 
@@ -147,7 +147,7 @@ switch choice
         end
 
     case 6
-        % run r optimizer
+        %run r optimizer
         [bestrs, dists] = r_Optimizer(rarr, q, tin, U0, ...
             max_inf, max_inf_idx);
         bestrs = bestrs/r;
