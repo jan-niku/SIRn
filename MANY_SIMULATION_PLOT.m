@@ -38,7 +38,7 @@ for idx=1:sers
 end
 
 % We need some stuff for 5 and 6 into SIRc for r-optimizing
-rmin=r/500;
+rmin=r/1000;
 rstep=r/1000;
 rmax=r;
 rarr=rmin:rstep:rmax;
@@ -49,12 +49,13 @@ metrics = readmatrix(METDIR+"metrics.txt");
 %% Menu
 msg = "What do you want to plot?";
 opts = ["K vs. Maximum New Infections" ...
-        "K vs. Iteration of Max New Infections" ...
-        "Network Max Infections vs. SIRc Max Infections" ...
-        "(Animated) Network Converge to Compartmental" ...
-        "(Animated) Reverse Convergence Gif" ...
-        "Clustering Coefficient vs. r-Compensation"];
-        
+    "K vs. Iteration of Max New Infections" ...
+    "Network Max Infections vs. SIRc Max Infections" ...
+    "(Animated) Network Converge to Fully Connected" ...
+    "(Animated) Reverse Convergence Gif" ...
+    "Clustering Coefficient vs. r-Compensation" ...
+    "Plot A Simulation by Clustering Coefficient"];
+
 choice = menu(msg,opts);
 
 switch choice
@@ -65,7 +66,7 @@ switch choice
         xlim([0 max(karr)])
         xlabel("K-value")
         ylabel("Maximum New Infections")
-        
+
     case 2
         plot(karr,max_new_inf_idx)
         title('K vs. Iteration of Max New Infections')
@@ -78,7 +79,7 @@ switch choice
         plot(karr, max_inf)
         xlim([0 max(karr)])
         ylim([0 SIRc_max_inf*1.2])
-        yline(SIRc_max_inf,'-','Compartmental Maximum','LineWidth',3)
+        yline(SIRc_max_inf,'-','Fully Connected Maximum','LineWidth',3)
         title("K vs. Maximum Infected")
         subtitle("N="+N);
         xlabel("K-value")
@@ -90,10 +91,11 @@ switch choice
         hold on
         plot(t+1,U(2,:))
         hold off
-        title("Infected; Compartmental vs. Networked")
+        title("Infected; Fully Connected vs. Networked")
         subtitle("K proportion: " + kprop(1))
         xlabel("Time")
         ylabel("Infected")
+        legend("Network", "Fully Connected")
         xlim([0 100])
         ylim([0 N])
         gif('convergence.gif','overwrite',true)
@@ -102,10 +104,11 @@ switch choice
             hold on
             plot(t+1,U(2,:))
             hold off
-            title("Infected; Compartmental vs. Networked")
+            title("Infected; Fully Connected vs. Networked")
             subtitle("K proportion: " + kprop(idx))
             xlabel("Time")
             ylabel("Infected")
+            legend("Network", "Fully Connected")
             xlim([0 100])
             ylim([0 N])
             gif
@@ -126,7 +129,7 @@ switch choice
         subtitle("r Compensation: "+rcompstr);
         xlabel("Time")
         ylabel("Infected")
-        legend("Network Model", "Compartmental Model")
+        legend("Network Model", "Fully Connected Model")
         gif('delete.gif','overwrite',true)
         for idx=1:iters
             plot(tarr{idx},Is{idx})
@@ -142,25 +145,68 @@ switch choice
             subtitle("r Compensation: "+rcompstr);
             xlabel("Time")
             ylabel("Infected")
-            legend("Network Model", "Compartmental Model")
+            legend("Fully Connected Model", "Network Model")
             gif
         end
 
     case 6
-        %run r optimizer
-        [bestrs, dists] = r_Optimizer(rarr, q, tin, U0, ...
-            max_inf, max_inf_idx);
-        bestrs = bestrs/r;
-        outopt = [bestrs, dists];
-        writematrix(outopt,METDIR+"opt_metrics.txt")
-        scatter(metrics(1,:),bestrs,80,dists,'filled')
-        colormap('turbo')
-        colorbar
-        title("r-Compensation vs. Cluster Coefficient")
+        msg = "Do you want to re-optimize?";
+        opts = ["No, load from file" ...
+            "Yes, reoptimize"];
+        choice = menu(msg,opts);
 
+        switch choice
+            case 1
+                outcomes = readmatrix(METDIR+"opt_metrics.txt");
+                bestrs = outcomes(1,:);
+                dists = outcomes(2,:);
+                percerrors = outcomes(3,:);
+                rcomp = outcomes(4,:);
+                scatter(metrics(1,:),rcomp,50,percerrors,'filled')
+                colormap('turbo')
+                colorbar
+                title("r-Compensation vs. Cluster Coefficient")
+                subtitle("Coloring by Percent Error of Best Peak Approximation")
+                xlabel("Clustering Coefficient of Network")
+                ylabel("Compensation Factor for Best Approximation")
+                exportgraphics(gcf,"r-optimization.png")
 
+            case 2
+                [bestrs, dists, percerrors] = r_Optimizer(rarr, q, tin, U0, ...
+                    max_inf, max_inf_idx);
+                rcomp = bestrs/r;
+                outopt = [bestrs; dists; percerrors; rcomp];
+                writematrix(outopt,METDIR+"opt_metrics.txt")
+                scatter(metrics(1,:),rcomp,50,percerrors,'filled')
+                colormap('turbo')
+                colorbar
+                title("r-Compensation vs. Cluster Coefficient")
+                subtitle("Coloring by Percent Error of Best Peak Approximation")
+                xlabel("Clustering Coefficient of Network")
+                ylabel("Compensation Factor for Best Approximation")
+                exportgraphics(gcf,"r-optimization.png")
+        end
 
-
+    case 7
+        outcomes = readmatrix(METDIR+"opt_metrics.txt");
+        bestrs = outcomes(1,:);
+        dists = outcomes(2,:);
+        percerrors = outcomes(3,:);
+        rcomp = outcomes(4,:);
+        prompt = {'Whats the value, approximately?'};
+        answ = inputdlg(prompt);
+        [net_sim, idx] = net_finder(str2num(answ{1}), metrics, Series);
+        plot(net_sim)
+        xlim([0 125])
+        hold on
+        rn = bestrs(idx);
+        [t,U] = SIRc_main(tin, U0, rn, q);
+        plot(t+1,U(:,2))
+        title("Network Simulation")
+        subtitle("K value: " + karr(idx));
+        xlabel("Time")
+        ylabel("Infections")
+        legend("Network", "Fully Connected")
 end
 
 

@@ -6,7 +6,7 @@
 % between the two peaks. Others should probably be tried
 % like maybe just vertical distance, too
 
-function [bestrs, dists] = r_Optimizer(rarr, q, tin, U0, ...
+function [bestrs, dists, percerrors] = r_Optimizer(rarr, q, tin, U0, ...
     max_inf, max_inf_idx)
 
 inner_iters = length(rarr);
@@ -14,6 +14,7 @@ outer_iters = length(max_inf);
 
 bestrs = zeros(1, outer_iters);
 dists = zeros(1, outer_iters);
+percerrors = zeros(1, outer_iters);
 
 progressbar('Optimizing r...')
 for j=1:outer_iters
@@ -23,12 +24,10 @@ for j=1:outer_iters
 
     mindist = 10000;
     bestr = 0;
-    dist = 10000;
 
     for i=1:inner_iters
         r = rarr(i);
         [t,U] = SIRc_main(tin, U0, r, q);
-        t = t';
         U = U';
         [M,I]= max(U(2,:));
         pt = [I M]; % where our max is
@@ -36,16 +35,15 @@ for j=1:outer_iters
         dist = norm(pt-opt);
         %dist=abs(pt(1)-opt(1));
 
-        if dist < mindist
+        if dist <= mindist
             mindist = dist;
             bestr = r;
-        else
-            break
+            best_est = M;
         end
     end
-
     bestrs(j) = bestr;
     dists(j) = mindist;
+    percerrors(j) = (best_est-opt(2))/opt(2);
 end
 
 end

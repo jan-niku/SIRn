@@ -13,11 +13,11 @@
 
 %% Parameters
 % Global
-N=1500; % number of nodes
+N=2000; % number of nodes
 % ask about directiories
 msg = "How should we handle saving? (if generating networks)";
 opts = ["Use Environment Variables for Paths (deletes old simulation)" ...
-    "Set Directories (I don't want to delete anything)" ...
+    "Set Directories (and then decide whether to regenerate)" ...
     "I just want to plot"];
 choice = menu(msg,opts);
 
@@ -51,15 +51,15 @@ end
 % Network
 Kmin=floor(log(N)); % minimum number of connections (over two)
 Kmax=ceil(N/2)+1; % maximum number of connections (over two)
-Kstep=5;
+Kstep=3;
 karr = Kmin:Kstep:Kmax;
-beta=.2; % rewiring (use 0)
+beta=.25; % rewiring (use 0)
 
 % SIR simulation
 q = 0.083; % recovery
 r = 0.0004; % infection prob
 max_iters = 2000; % maximum iterations of simulation
-parent_prop = 0.005; % proportion of network as parents
+parent_prop = 0.03; % proportion of network as parents
 num_parents = ceil(N*parent_prop);
 parents = randi(N,1,num_parents);
 
