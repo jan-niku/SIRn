@@ -81,7 +81,6 @@ compartments = [1, ... % infected
                 1];    % cumulative infected
 GIFNAME = "convergence.gif";
 
-
 %% Runtime
 
 switch answer
@@ -107,5 +106,5 @@ switch answer
 
         MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
             N, karr, SIRc_tspan, SIRc_U, ...
-            U0, q, r, tin, METDIR);
+            U0, q, r, tin, METDIR,beta);
 end

@@ -1,4 +1,5 @@
-function[inf,nisum,rec,infsum] = sir_simulation(A,parent_node,prob,immunized,r,num_of_steps)
+function[inf,nisum,rec,infsum,s_all] = sir_simulation(A,parent_node,...
+    prob,immunized,r,num_of_steps)
 %OUTPUT
 %inf - number of infected
 %nisum - number of infected nodes in each iteration
@@ -59,6 +60,7 @@ r_sequence = [];
             recovered = ni';
             % record this time step for graphing i think?
             z_all(1,:) = z;
+            s_all(1,:) = z; % our simulation array
         % If we are not on the first step
         % (so everything is set up)
         else
@@ -69,12 +71,16 @@ r_sequence = [];
             A = nA;
             recovered = recovered + nr;
             recovered(recovered > 1)=1;
+            s_all(i,:) = z-recovered';
+            
         end
         inf(i) = sum(z(z==1));
         nisum(i) = sum(ni(ni==1));
         rec(i) = sum(recovered(recovered==1));
         infsum(i) = sum(z(z==1));
         inf(i) = inf(i)-rec(i);
+        %% This forces stopping
+        % see if you need to disable this later
         if i > 1 && inf(i) == 0
             break
         end

@@ -2,7 +2,7 @@
 
 function ret = MANY_SIMULATION_PLOT(SIRDIR, ...
     compartments, GIFNAME, N, karr, t, U, ...
-    U0, q, r, tin, METDIR)
+    U0, q, r, tin, METDIR, beta)
 
 % get the series
 sim_first = 1;
@@ -54,7 +54,8 @@ opts = ["K vs. Maximum New Infections" ...
     "(Animated) Network Converge to Fully Connected" ...
     "(Animated) Reverse Convergence Gif" ...
     "Clustering Coefficient vs. r-Compensation" ...
-    "Plot A Simulation by Clustering Coefficient"];
+    "Plot A Simulation by Clustering Coefficient" ...
+    "Simple Network SIR"];
 
 choice = menu(msg,opts);
 
@@ -124,7 +125,7 @@ switch choice
         hold off
         ylim([0 N])
         xlim([0 75])
-        title("Adjusting r to fit networked model")
+        title("Adjusting r to Fit Networked Model")
         rcompstr = sprintf('%01.04f',rarr(1)/r);
         subtitle("r Compensation: "+rcompstr);
         xlabel("Time")
@@ -140,7 +141,7 @@ switch choice
             hold off
             ylim([0 N])
             xlim([0 75])
-            title("Adjusting r to fit networked model")
+            title("Adjusting r to Fit Networked Model")
             rcompstr = sprintf('%01.04f',rarr(idx)/r);
             subtitle("r Compensation: "+rcompstr);
             xlabel("Time")
@@ -162,7 +163,7 @@ switch choice
                 dists = outcomes(2,:);
                 percerrors = outcomes(3,:);
                 rcomp = outcomes(4,:);
-                scatter(metrics(1,:),rcomp,50,percerrors,'filled')
+                scatter(metrics(1,:),rcomp,25,percerrors,'filled')
                 colormap('turbo')
                 colorbar
                 title("r-Compensation vs. Cluster Coefficient")
@@ -177,7 +178,7 @@ switch choice
                 rcomp = bestrs/r;
                 outopt = [bestrs; dists; percerrors; rcomp];
                 writematrix(outopt,METDIR+"opt_metrics.txt")
-                scatter(metrics(1,:),rcomp,50,percerrors,'filled')
+                scatter(metrics(1,:),rcomp,25,percerrors,'filled')
                 colormap('turbo')
                 colorbar
                 title("r-Compensation vs. Cluster Coefficient")
@@ -207,6 +208,93 @@ switch choice
         xlabel("Time")
         ylabel("Infections")
         legend("Network", "Fully Connected")
+
+    case 8
+        % generate a network simulation
+        % 30,2,0.08,0.05,0.07 looks good
+        ns = 30;
+        ks = 2;
+        beta = .08;
+        r=0.05;
+        q=0.07;
+
+        parents = randi(ns,1,ceil(ns*.06));
+        g = WattsStrogatz(ns,ks,beta);
+        a = adjacency(g);
+        [inf,nisum,rec,infsum,s_all] = sir_simulation(...
+            a,parents,r,[],q,200); % note zall only holds inf
+        stps = length(inf)*1.05;
+
+        ii = length(parents);
+        [t,U] = SIRc_main([0 200], [ns-ii ii 0] , r, q);
+        U = U';
+        t = t';
+        up = max(U(2,:))*1.1;
+
+        % coloring
+        % we need a couple of columns of zeros
+        rs = zeros(ns,2);
+        nstep = size(s_all,1);
+        colors = [];
+        for idx=1:nstep
+            colors(:,:,idx) = [s_all(idx,:)' rs];
+        end
+
+        subplot(2,1,1)
+        plot(0,inf(1))
+        title("Infected in Model")
+        ylabel("Number Infected")
+        hold on
+        upto = t<=1;
+        plot(t(upto)+1,U(2,upto))
+        hold off
+        xlim([0 stps])
+        ylim([0 up])
+        %        legend("Network", "Fully Connected")
+
+        subplot(2,1,2)
+        p=plot(g, ...
+            'NodeColor', colors(:,:,1), ...
+            'NodeLabel', {});
+        p.Marker='s';
+        title("Network Simulation")
+        titstring="N="+ns+", K="+ks+", \beta="+beta;
+        subtitle(titstring)
+
+        gif('simple_network_sir.gif',...
+            'overwrite',true,...
+            'DelayTime',.25,...
+            'resolution',150)
+
+        for r=2:nstep
+
+            subplot(2,1,1)
+            plot(inf(1:r))
+            xlim([0 stps])
+            ylim([0 up])
+            title("Infected in Model")
+            ylabel("Number Infected")
+            hold on
+            upto = t<=r;
+            plot(t(upto)+1,U(2,upto))
+            hold off
+            %            legend("Network", "Fully Connected")
+
+            subplot(2,1,2)
+            p=plot(g, ...
+                'NodeColor', colors(:,:,r), ...
+                'NodeLabel', {});
+            p.Marker='s';
+            title("Network Simulation")
+            titstring="N="+ns+", K="+ks+", \beta="+beta;
+            subtitle(titstring)
+
+            gif
+        end
+
+
+
 end
+
 
 
