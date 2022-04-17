@@ -1,8 +1,8 @@
 % Experimental code for plotting many simulations at once
 
 function ret = MANY_SIMULATION_PLOT(SIRDIR, ...
-    compartments, GIFNAME, N, karr, t, U, ...
-    U0, q, r, tin, METDIR, beta)
+    compartments, ~, N, karr, t, U, ...
+    U0, q, r, tin, METDIR, ~)
 
 % get the series
 sim_first = 1;
@@ -10,7 +10,7 @@ sim_step = 1;
 sim_last = length(karr);
 Series = sim_grabber(sim_first, sim_step, sim_last, ...
     compartments, SIRDIR);
-[comps, ~, sers] = size(Series); % cols, the middle, always 1
+[~, ~, sers] = size(Series); % cols, the middle, always 1
 
 % inputs are the wrong dimension
 %U = U';
@@ -55,7 +55,7 @@ opts = ["K vs. Maximum New Infections" ...
     "(Animated) Reverse Convergence Gif" ...
     "Clustering Coefficient vs. r-Compensation" ...
     "Plot A Simulation by Clustering Coefficient" ...
-    "Simple Network SIR"];
+    "(Animated) Simple Network SIR"];
 
 choice = menu(msg,opts);
 
@@ -87,7 +87,10 @@ switch choice
         ylabel("Maximum Infected")
 
     case 4
+
         kprop = karr/N; % K as a proportion of N
+        fcmax = max(U(2,:))*1.1; % for vert graph param
+
         plot(Series{1,1,1})
         hold on
         plot(t+1,U(2,:))
@@ -98,9 +101,12 @@ switch choice
         ylabel("Infected")
         legend("Network", "Fully Connected")
         xlim([0 100])
-        ylim([0 N])
+        ylim([0 fcmax])
+
         gif('convergence.gif','overwrite',true)
+
         for idx=2:sers
+
             plot(Series{1,1,idx})
             hold on
             plot(t+1,U(2,:))
@@ -111,13 +117,14 @@ switch choice
             ylabel("Infected")
             legend("Network", "Fully Connected")
             xlim([0 100])
-            ylim([0 N])
+            ylim([0 fcmax])
+
             gif
         end
 
     case 5
         progressbar('Generating SIRc Outcomes')
-        [tarr, max_I, max_I_idx, Is, iters] = MANY_SIRc_GEN(tin, U0, ...
+        [tarr, ~, ~, Is, iters] = MANY_SIRc_GEN(tin, U0, ...
             q, rmin, rstep, rmax);
         plot(tarr{1}, Is{1})
         hold on
@@ -151,52 +158,100 @@ switch choice
         end
 
     case 6
-        msg = "Do you want to re-optimize?";
-        opts = ["No, load from file" ...
-            "Yes, reoptimize"];
+        msg = "Do you want to optimize?";
+        opts = ["No, load from file (will error if first run)" ...
+            "Yes, optimize (will take a couple minutes)"];
         choice = menu(msg,opts);
+
+        cc = metrics(1,:);
 
         switch choice
             case 1
+
                 outcomes = readmatrix(METDIR+"opt_metrics.txt");
                 bestrs = outcomes(1,:);
                 dists = outcomes(2,:);
                 percerrors = outcomes(3,:);
                 rcomp = outcomes(4,:);
-                scatter(metrics(1,:),rcomp,25,percerrors,'filled')
+                beginidx = outcomes(5,1);
+
+                % we have discarded some trivial fittings
+                cc = cc(beginidx:end);
+
+                c=polyfit(sqrt(cc),rcomp,1);
+                fit = @(x) c(1)*sqrt(x)+c(2);
+
+                prederror = (fit(cc)-rcomp)./rcomp;
+
+                subplot(2,1,1)
+                scatter(cc,rcomp,25,prederror,'filled')
+                hold on
+                fplot(fit,[0.25,1])
+                hold off
                 colormap('turbo')
                 colorbar
                 title("r-Compensation vs. Cluster Coefficient")
-                subtitle("Coloring by Percent Error of Best Peak Approximation")
+                subtitle("Coloring by Percent Error of Root Fit")
                 xlabel("Clustering Coefficient of Network")
-                ylabel("Compensation Factor for Best Approximation")
+                ylabel("r Compensation Giving Best Fit")
+
+                subplot(2,1,2)
+                scatter(cc,prederror,'.')
+                xlim([.2 1])
+                yline(0,'-','LineWidth',2)
+                title("Residuals of Square-Root Fit")
+                xlabel("Clustering Coefficient")
+                ylabel("Error")
+
                 exportgraphics(gcf,"r-optimization.png")
 
             case 2
-                [bestrs, dists, percerrors] = r_Optimizer(rarr, q, tin, U0, ...
+
+                [bestrs, dists, percerrors, beginidx] = r_Optimizer(...
+                    rarr, q, tin, U0, ...
                     max_inf, max_inf_idx);
+
                 rcomp = bestrs/r;
-                outopt = [bestrs; dists; percerrors; rcomp];
+                beginarr = [beginidx zeros(1,length(rcomp)-1)];
+                outopt = [bestrs; dists; percerrors; rcomp; beginarr];
                 writematrix(outopt,METDIR+"opt_metrics.txt")
-                scatter(metrics(1,:),rcomp,25,percerrors,'filled')
+
+                % we have discarded some trivial fittings
+                cc = cc(beginidx:end);
+
+                % create a fitting
+                c=polyfit(sqrt(cc),rcomp,1);
+                fit = @(x) c(1)*sqrt(x)+c(2);
+
+                % predict then calculate error
+                prederror = (fit(cc)-rcomp)./rcomp;
+
+                scatter(cc,rcomp,25,prederror,'filled')
+                hold on
+                fplot(fit,[0.25,1])
+                hold off
                 colormap('turbo')
                 colorbar
                 title("r-Compensation vs. Cluster Coefficient")
-                subtitle("Coloring by Percent Error of Best Peak Approximation")
+                subtitle("Coloring by Percent Error of Root Fit")
                 xlabel("Clustering Coefficient of Network")
                 ylabel("Compensation Factor for Best Approximation")
+
                 exportgraphics(gcf,"r-optimization.png")
         end
 
     case 7
+
         outcomes = readmatrix(METDIR+"opt_metrics.txt");
         bestrs = outcomes(1,:);
-        dists = outcomes(2,:);
-        percerrors = outcomes(3,:);
-        rcomp = outcomes(4,:);
+        %        dists = outcomes(2,:);
+        %        percerrors = outcomes(3,:);
+        %        rcomp = outcomes(4,:);
+
         prompt = {'Whats the value, approximately?'};
         answ = inputdlg(prompt);
-        [net_sim, idx] = net_finder(str2num(answ{1}), metrics, Series);
+        [net_sim, idx] = net_finder(str2double(answ{1}), metrics, Series);
+
         plot(net_sim)
         xlim([0 125])
         hold on
@@ -212,16 +267,16 @@ switch choice
     case 8
         % generate a network simulation
         % 30,2,0.08,0.05,0.07 looks good
-        ns = 30;
+        ns = 21;
         ks = 2;
-        beta = .08;
+        beta = .15;
         r=0.05;
         q=0.07;
 
         parents = randi(ns,1,ceil(ns*.06));
         g = WattsStrogatz(ns,ks,beta);
         a = adjacency(g);
-        [inf,nisum,rec,infsum,s_all] = sir_simulation(...
+        [inf,~,~,~,s_all] = sir_simulation(...
             a,parents,r,[],q,200); % note zall only holds inf
         stps = length(inf)*1.05;
 
@@ -243,6 +298,7 @@ switch choice
         subplot(2,1,1)
         plot(0,inf(1))
         title("Infected in Model")
+        subtitle("r="+r+", q="+q)
         ylabel("Number Infected")
         hold on
         upto = t<=1;
@@ -250,7 +306,7 @@ switch choice
         hold off
         xlim([0 stps])
         ylim([0 up])
-        %        legend("Network", "Fully Connected")
+        legend("Network", "Fully Connected",'Location', 'northeast')
 
         subplot(2,1,2)
         p=plot(g, ...
@@ -261,28 +317,29 @@ switch choice
         titstring="N="+ns+", K="+ks+", \beta="+beta;
         subtitle(titstring)
 
-        gif('simple_network_sir.gif',...
+        gif('simple_network_sir2.gif',...
             'overwrite',true,...
             'DelayTime',.25,...
-            'resolution',150)
+            'resolution',200)
 
-        for r=2:nstep
+        for idx=2:nstep
 
             subplot(2,1,1)
-            plot(inf(1:r))
+            plot(inf(1:idx))
             xlim([0 stps])
             ylim([0 up])
             title("Infected in Model")
+            subtitle("r="+r+", q="+q)
             ylabel("Number Infected")
             hold on
-            upto = t<=r;
+            upto = t<=idx;
             plot(t(upto)+1,U(2,upto))
             hold off
-            %            legend("Network", "Fully Connected")
+            legend("Network", "Fully Connected", 'Location', 'northeast')
 
             subplot(2,1,2)
             p=plot(g, ...
-                'NodeColor', colors(:,:,r), ...
+                'NodeColor', colors(:,:,idx), ...
                 'NodeLabel', {});
             p.Marker='s';
             title("Network Simulation")

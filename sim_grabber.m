@@ -22,6 +22,7 @@ function Series = sim_grabber(sim_first, sim_step, sim_last, ...
         FILEPATH = SIRDIR+FILENAME;
 
         simulation = readmatrix(FILEPATH);
+%        simulation(1,:) = simulation(1,:)+1; % fix an off by one error
 
         for srs=1:qty_compartments
             % series row needs to be indexed by consecutive ints
