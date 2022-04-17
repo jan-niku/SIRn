@@ -6,24 +6,33 @@
 % between the two peaks. Others should probably be tried
 % like maybe just vertical distance, too
 
-function [bestrs, dists, percerrors, beginidx] = r_Optimizer(rarr, q, tin, U0, ...
-    max_inf, max_inf_idx)
+% problem:
+% we are having index issues
+% we are just trying to ignore everything before and including
+% the last index where the max is right at the beginning
+% you only get 57 out of this? There are over 300 simulations!
+% then cc errors in polyfit, with len 257~ which sounds right
+% why are we getting so few out here?!
 
-% how many r we are going to search over
-% for the best fit
-inner_iters = length(rarr);
-outer_iters = length(max_inf_idx);
+
+function [bestrs, dists, percerrors, beginidx] = r_Optimizer(rarr, q, tin, U0, ...
+    max_inf, max_inf_idx,num_parents)
 
 % we dont want to fit where the disease just dies out immediately
-nf = max_inf_idx == 1;
-beginidx = find(nf,1,'last') + 1;
+nf = max_inf == num_parents;
+beginidx = find(nf,1,'last')+1;
 
 % quantify and cry for the lost time 
 lost = max_inf_idx(1:beginidx) > 1;
 tl = sum(lost);
 disp("Discarding "+tl+" nontrivial simulations")
 
-%outer_iters = length(max_inf(beginidx:end));
+%rarr = rarr(beginidx:end);
+max_inf_idx = max_inf_idx(beginidx:end);
+max_inf = max_inf(beginidx:end);
+
+inner_iters = length(rarr);
+outer_iters = length(max_inf);
 
 bestrs = zeros(1, outer_iters);
 dists = zeros(1, outer_iters);
@@ -59,8 +68,8 @@ for j=1:outer_iters
 end
 
 % we discard ones where the disease dies out right away
-bestrs = bestrs(beginidx:end);
-dists = dists(beginidx:end);
-percerrors = percerrors(beginidx:end);
+% bestrs = bestrs(beginidx:end);
+% dists = dists(beginidx:end);
+% percerrors = percerrors(beginidx:end);
 
 end

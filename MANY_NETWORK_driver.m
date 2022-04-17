@@ -11,32 +11,41 @@
 % just in case we are doing a lot of testing
 % lets allow these to be set in code
 % Global
-N=1000; % number of nodes
+
+% our large, hacky container
+sirc = struct;
+
+% KEY PARAMETERS
+% number of nodes
+sirc.N = 1500;
+Kstep = 5;
+sirc.q = 0.083; % recovery
+sirc.r = 0.0004; % infection prob
 
 % Network
-Kmin=floor(log(N)); % minimum number of connections (over two)
-Kmax=ceil(N/2)+1; % maximum number of connections (over two)
-Kstep=5;
-karr = Kmin:Kstep:Kmax;
-beta=.25; % rewiring (use 0)
+Kmin=floor(log(sirc.N)); % minimum number of connections (over two)
+Kmax=ceil(sirc.N/2)+1; % maximum number of connections (over two)
+sirc.karr = Kmin:Kstep:Kmax;
+sirc.beta=.25; % rewiring (use 0)
 
 % SIR simulation
-q = 0.083; % recovery
-r = 0.0004; % infection prob
-max_iters = 2000; % maximum iterations of simulation
-parent_prop = 0.03; % proportion of network as parents
-num_parents = ceil(N*parent_prop);
-parents = randi(N,1,num_parents);
+sirc.max_iters = 2000; % maximum iterations of simulation
+sirc.parent_prop = 0.03; % proportion of network as parents
+sirc.num_parents = ceil(sirc.N*sirc.parent_prop);
+sirc.parents = randi(sirc.N,1,sirc.num_parents);
 
 % Run SIRc to populate
-S0 = N-length(parents);
-I0 = length(parents);
+S0 = sirc.N-length(sirc.parents);
+I0 = length(sirc.parents);
 R0 = 0;
-U0 = [S0 I0 R0];
-tin = [0 200];
-[SIRc_tspan, SIRc_U] = SIRc_main(tin, U0, r, q);
-SIRc_tspan = SIRc_tspan';
+sirc.U0 = [S0 I0 R0];
+sirc.tin = [0 200];
+[SIRc_tspan, SIRc_U] = SIRc_main(sirc.tin, sirc.U0, sirc.r, sirc.q);
+sirc.tspan = SIRc_tspan';
 SIRc_U = SIRc_U';
+sirc.U1 = SIRc_U(1,:)';
+sirc.U2 = SIRc_U(2,:)';
+sirc.U3 = SIRc_U(3,:)';
 
 %% User Interface
 msg = "What do you want to do?";
@@ -54,17 +63,17 @@ switch choice
         BASENAME = "smallworld"; % the basename onto which k's are appended
         FMT = ".txt"; % the format of saving
 
-        answer = questdlg('Do you want to generate networks?', ...
+        answer = questdlg('Are you sure you want to generate networks?', ...
             'Runtime', ...
-            'Yes, and plot', ...
+            'Yes, write and plot', ...
             'No, just plot', ...
             'No, just plot'); % default to not overwriting
 
 
     case 1
-        answer = questdlg('Do you want to generate networks?', ...
+        answer = questdlg('Are you sure you want to generate networks?', ...
             'Runtime', ...
-            'Yes, and plot', ...
+            'Yes, write and plot', ...
             'No, just plot', ...
             'No, just plot'); % default to not overwriting
 
@@ -72,8 +81,8 @@ switch choice
     case 3
         answer = 'No, just plot';
 
-%    case 4
-%        disp('TODO')
+        %    case 4
+        %        disp('TODO')
 end
 
 switch answer
@@ -84,17 +93,23 @@ switch answer
         delete(METDIR + "*txt");
 
         progressbar('generating networks...')
-        MANY_NETWORK_GEN(N, ...
-            Kmin, Kmax, Kstep, beta, ...
+        MANY_NETWORK_GEN(sirc.N, ...
+            Kmin, Kmax, Kstep, sirc.beta, ...
             SAVEDIR, BASENAME, FMT, METDIR);
 
         progressbar('running sir...')
         MANY_NETWORK_SIR(SAVEDIR, BASENAME, FMT, SIRDIR, ...
-            N, q, r, max_iters, num_parents)
+            sirc.N, sirc.q, sirc.r, sirc.max_iters, sirc.num_parents)
+
+        writestruct(sirc, SIRDIR+"params.xml");
 
     case 'No, just plot'
+        sirc = readstruct(SIRDIR+"params.xml");
 end
 
-MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
-    N, karr, SIRc_tspan, SIRc_U, ...
-    U0, q, r, tin, METDIR,beta);
+% MANY_SIMULATION_PLOT(SIRDIR, compartments, GIFNAME, ...
+%     N, karr, SIRc_tspan, SIRc_U, ...
+%     U0, q, r, tin, METDIR,beta,num_parents);
+
+MANY_SIMULATION_PLOT(SIRDIR, [1 1 1 1], ...
+    METDIR,sirc);
