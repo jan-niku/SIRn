@@ -1,13 +1,13 @@
-% SIRc many
-%% This function will return a cell of infection arrays
-% these will be time series infections from varying r in a sir simulation
+N = 2000;
 
-function [t, max_I, max_I_iter] = MANY_SIRc_GEN(tarr, U0, p, r)
+S0 = 1940;
+I0 = 60;
+R0 = 0;
+U0 = [S0 I0 R0];
 
+r=0.0004;
+q=0.083;
 
+[t,u] = ode45(@(t,U) SIRc(t,U,r,q), [0 200], U0);
 
-[t,U] = SIRc_main([0 200], [S0 I0 R0], p, r);
-t = t';
-U = U'; 
-
-
+plot(u(:,2))

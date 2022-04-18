@@ -442,7 +442,6 @@ switch choice
                 xlabel("Average Path Length")
                 ylabel("Error")
 
-
                 exportgraphics(gcf,"APL-r-optimization.png")
         end
 

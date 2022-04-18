@@ -6,15 +6,6 @@
 % between the two peaks. Others should probably be tried
 % like maybe just vertical distance, too
 
-% problem:
-% we are having index issues
-% we are just trying to ignore everything before and including
-% the last index where the max is right at the beginning
-% you only get 57 out of this? There are over 300 simulations!
-% then cc errors in polyfit, with len 257~ which sounds right
-% why are we getting so few out here?!
-
-
 function [bestrs, dists, percerrors, beginidx] = r_Optimizer(rarr, q, tin, U0, ...
     max_inf, max_inf_idx,num_parents)
 
