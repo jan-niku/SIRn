@@ -125,7 +125,7 @@ switch choice
         hold on
         plot(Series{1,1,ceil(sers*.65)})
         hold off
-        ylim([0 sirc.N]) % STOPPED HERE REFACTORING
+        ylim([0 sirc.N])
         xlim([0 75])
         title("Adjusting r to Fit Networked Model")
         rcompstr = sprintf('%01.04f',rarr(1)/sirc.r);
@@ -173,8 +173,8 @@ switch choice
                 % we have discarded some trivial fittings
                 cc = cc(beginidx:end);
 
-                c=polyfit(sqrt(cc),rcomp,1);
-                fit = @(x) c(1)*sqrt(x)+c(2);
+                c=polyfit(log(cc),rcomp,1);
+                fit = @(x) c(1)*log(x)+c(2);
 
                 prederror = (fit(cc)-rcomp)./rcomp;
 
@@ -186,7 +186,7 @@ switch choice
                 colormap('turbo')
                 colorbar
                 title("r-Compensation vs. Cluster Coefficient")
-                subtitle("Coloring by Percent Error of Root Fit")
+                subtitle("Coloring by Percent Error of Log Fit")
                 xlabel("Clustering Coefficient of Network")
                 ylabel("r Compensation Giving Best Fit")
 
@@ -194,7 +194,7 @@ switch choice
                 scatter(cc,prederror,'.')
                 xlim([.2 1])
                 yline(0,'-','LineWidth',2)
-                title("Residuals of Square-Root Fit")
+                title("Residuals of Log Fit")
                 xlabel("Clustering Coefficient")
                 ylabel("Error")
 
@@ -215,8 +215,8 @@ switch choice
                 cc = cc(beginidx:end);
 
                 % create a fitting
-                c=polyfit(sqrt(cc),rcomp,1);
-                fit = @(x) c(1)*sqrt(x)+c(2);
+                c=polyfit(log(cc),rcomp,1);
+                fit = @(x) c(1)*log(x)+c(2);
 
                 % predict then calculate error
                 prederror = (fit(cc)-rcomp)./rcomp;
@@ -229,7 +229,7 @@ switch choice
                 colormap('turbo')
                 colorbar
                 title("r-Compensation vs. Cluster Coefficient")
-                subtitle("Coloring by Percent Error of Root Fit")
+                subtitle("Coloring by Percent Error of Log Fit")
                 xlabel("Clustering Coefficient of Network")
                 ylabel("r Compensation Giving Best Fit")
 
@@ -237,7 +237,7 @@ switch choice
                 scatter(cc,prederror,'.')
                 xlim([.2 1])
                 yline(0,'-','LineWidth',2)
-                title("Residuals of Square-Root Fit")
+                title("Residuals of Log Fit")
                 xlabel("Clustering Coefficient")
                 ylabel("Error")
 

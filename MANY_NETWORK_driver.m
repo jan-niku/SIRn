@@ -17,8 +17,8 @@ sirc = struct;
 
 % KEY PARAMETERS
 % number of nodes
-sirc.N = 1500;
-Kstep = 5;
+sirc.N = 2000;
+Kstep = 2;
 sirc.q = 0.083; % recovery
 sirc.r = 0.0004; % infection prob
 
@@ -86,7 +86,7 @@ switch choice
 end
 
 switch answer
-    case 'Yes, and plot'
+    case 'Yes, write and plot'
         % clear all old files
         delete(SIRDIR + "*txt");
         delete(SAVEDIR + "*" + FMT);
