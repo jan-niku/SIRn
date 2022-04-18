@@ -24,7 +24,7 @@ sirc.r = 0.0004; % infection prob
 
 % Network
 Kmin=floor(log(sirc.N)); % minimum number of connections (over two)
-Kmax=ceil(sirc.N/2)+1; % maximum number of connections (over two)
+Kmax=ceil(sirc.N-1)/2; % maximum number of connections (over two)
 sirc.karr = Kmin:Kstep:Kmax;
 sirc.beta=.25; % rewiring (use 0)
 
@@ -57,9 +57,9 @@ choice = menu(msg,opts);
 
 switch choice
     case 2
-        SAVEDIR = uigetdir + "\"; % folder where networks are saved
-        METDIR = uigetdir + "\"; % place to keep metrics
-        SIRDIR = uigetdir + "\";
+        SAVEDIR = uigetdir('./', "Select network directory") + "\"; % folder where networks are saved
+        METDIR = uigetdir('./', "Select metric directory") + "\"; % place to keep metrics
+        SIRDIR = uigetdir('./', "Select simulation directory") + "\";
         BASENAME = "smallworld"; % the basename onto which k's are appended
         FMT = ".txt"; % the format of saving
 
@@ -111,5 +111,12 @@ end
 %     N, karr, SIRc_tspan, SIRc_U, ...
 %     U0, q, r, tin, METDIR,beta,num_parents);
 
+if ~exist("Series")
+    numsim = dir(SIRDIR+"*.txt");
+    numsim = length(numsim);
+    Series = sim_grabber(numsim, ...
+        [1 1 1 1], SIRDIR);
+end
+
 MANY_SIMULATION_PLOT(SIRDIR, [1 1 1 1], ...
-    METDIR,sirc);
+    METDIR,sirc,Series,numsim);

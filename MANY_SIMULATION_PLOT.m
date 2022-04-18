@@ -1,14 +1,13 @@
-% Experimental code for plotting many simulations at once
+%% The main plotting wrapper that is called by many_network_driver
+% at some point these all need to be split off into different functions
+
+%% TODO
+% some kind train test split on 7/9, 
+% alternatively, generate some new networks and try it out
 
 function ret = MANY_SIMULATION_PLOT(SIRDIR, ...
-    compartments, METDIR, sirc)
+    compartments, METDIR, sirc,Series,numsim)
 
-% get the series
-% TODO: WE HAVE SOME OF THESE IN STRUCT, REFACTOR
-numsim = dir(SIRDIR+"*.txt");
-numsim = length(numsim);
-Series = sim_grabber(numsim, ...
-    compartments, SIRDIR);
 [~, ~, sers] = size(Series); % cols, the middle, always 1
 
 % populate infected arrays
@@ -49,8 +48,9 @@ opts = ["K vs. Maximum New Infections" ...
     "(Animated) Network Converge to Fully Connected" ...
     "(Animated) Reverse Convergence Gif" ...
     "Clustering Coefficient vs. r-Compensation" ...
-    "Plot A Simulation by Clustering Coefficient" ...
-    "(Animated) Simple Network SIR"];
+    "Plot a Simulation by Clustering Coefficient" ...
+    "(Animated) Simple Network SIR" ...
+    "Average Path Length vs. r-Compensation"];
 
 choice = menu(msg,opts);
 
@@ -86,32 +86,32 @@ switch choice
         kprop = sirc.karr/sirc.N; % K as a proportion of N
         fcmax = max(sirc.U2)*1.1; % for vert graph param
 
-        plot(Series{1,1,1})
+        plot(Series{1,1,1},'Color','black')
         hold on
-        plot(sirc.tspan+1,sirc.U2)
+        plot(sirc.tspan+1,sirc.U2,'--')
         hold off
         title("Infected; Fully Connected vs. Networked")
         subtitle("K proportion: " + kprop(1))
         xlabel("Time")
         ylabel("Infected")
         legend("Network", "Fully Connected")
-        xlim([0 100])
+        xlim([0 70])
         ylim([0 fcmax])
 
         gif('convergence.gif','overwrite',true)
 
         for idx=2:sers
 
-            plot(Series{1,1,idx})
+            plot(Series{1,1,idx},'Color','black')
             hold on
-            plot(sirc.tspan+1,sirc.U2)
+            plot(sirc.tspan+1,sirc.U2,'--')
             hold off
             title("Infected; Fully Connected vs. Networked")
             subtitle("K proportion: " + kprop(idx))
             xlabel("Time")
             ylabel("Infected")
             legend("Network", "Fully Connected")
-            xlim([0 100])
+            xlim([0 70])
             ylim([0 fcmax])
 
             gif
@@ -271,9 +271,9 @@ switch choice
     case 8
         % generate a network simulation
         % 30,2,0.08,0.05,0.07 looks good
-        ns = 21;
-        ks = 2;
-        beta = .15;
+        ns = 40;
+        ks = 3;
+        beta = .12;
         r=0.05;
         q=0.07;
 
@@ -351,6 +351,99 @@ switch choice
             subtitle(titstring)
 
             gif
+        end
+
+    case 9
+        msg = "Do you want to optimize?";
+        opts = ["No, load from file (will error if first run)" ...
+            "Yes, optimize (will take a couple minutes)"];
+        choice = menu(msg,opts);
+
+        cc = metrics(2,:);
+
+        switch choice
+            case 1
+
+                outcomes = readmatrix(METDIR+"APL-opt_metrics.txt");
+                bestrs = outcomes(1,:);
+                dists = outcomes(2,:);
+                percerrors = outcomes(3,:);
+                rcomp = outcomes(4,:);
+                beginidx = outcomes(5,1);
+
+                % we have discarded some trivial fittings
+                cc = cc(beginidx:end);
+
+                c=polyfit(log(cc),rcomp,1);
+                fit = @(x) c(1)*log(x)+c(2);
+
+                prederror = (fit(cc)-rcomp)./rcomp;
+
+                subplot(2,1,1)
+                scatter(cc,rcomp,25,prederror,'filled')
+                hold on
+                fplot(fit,[1,2])
+                hold off
+                colormap('turbo')
+                colorbar
+                title("r-Compensation vs. Average Path Length")
+                subtitle("Coloring by Percent Error of Log Fit")
+                xlabel("Average Path Length of Network")
+                ylabel("r Compensation Giving Best Fit")
+
+                subplot(2,1,2)
+                scatter(cc,prederror,'.')
+                xlim([1 2])
+                yline(0,'-','LineWidth',2)
+                title("Residuals of Log Fit")
+                xlabel("Average Path Length")
+                ylabel("Error")
+
+                exportgraphics(gcf,"APL-r-optimization.png")
+
+            case 2
+
+                [bestrs, dists, percerrors, beginidx] = r_Optimizer(...
+                    rarr, sirc.q, sirc.tin, sirc.U0, ...
+                    max_inf, max_inf_idx,sirc.num_parents);
+
+                rcomp = bestrs/sirc.r;
+                beginarr = [beginidx zeros(1,length(rcomp)-1)];
+                outopt = [bestrs; dists; percerrors; rcomp; beginarr];
+                writematrix(outopt,METDIR+"APL-opt_metrics.txt")
+
+                % we have discarded some trivial fittings
+                cc = cc(beginidx:end);
+
+                % create a fitting
+                c=polyfit(log(cc),rcomp,1);
+                fit = @(x) c(1)*log(x)+c(2);
+
+                % predict then calculate error
+                prederror = (fit(cc)-rcomp)./rcomp;
+
+                subplot(2,1,1)
+                scatter(cc,rcomp,25,prederror,'filled')
+                hold on
+                fplot(fit,[1,2])
+                hold off
+                colormap('turbo')
+                colorbar
+                title("r-Compensation vs. Average Path Length")
+                subtitle("Coloring by Percent Error of Log Fit")
+                xlabel("Average Path Length of Network")
+                ylabel("r Compensation Giving Best Fit")
+
+                subplot(2,1,2)
+                scatter(cc,prederror,'.')
+                xlim([1 2])
+                yline(0,'-','LineWidth',2)
+                title("Residuals of Log Fit")
+                xlabel("Average Path Length")
+                ylabel("Error")
+
+
+                exportgraphics(gcf,"APL-r-optimization.png")
         end
 
 
