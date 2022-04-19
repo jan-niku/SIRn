@@ -11,12 +11,21 @@ function [bestrs, dists, percerrors, beginidx] = r_Optimizer(rarr, q, tin, U0, .
 
 % we dont want to fit where the disease just dies out immediately
 nf = max_inf == num_parents;
-beginidx = find(nf,1,'last')+1;
+if sum(nf) % it's true somewhere
+    beginidx = find(nf,1,'last')+1;
+else % it's false, we can use the whole thing
+    beginidx = 1;
+end
 
 % quantify and cry for the lost time 
 lost = max_inf_idx(1:beginidx) > 1;
 tl = sum(lost);
 disp("Discarding "+tl+" nontrivial simulations")
+
+% generate random proportion of indeces
+% numsamps = length(max_inf);
+% randidx = randperm(beginidx:numsamps);
+% splitpt = floor(numpsamps*testprop);
 
 %rarr = rarr(beginidx:end);
 max_inf_idx = max_inf_idx(beginidx:end);

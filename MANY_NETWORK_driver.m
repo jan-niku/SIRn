@@ -17,7 +17,7 @@ sirc = struct;
 
 % KEY PARAMETERS
 % number of nodes
-sirc.N = 1000;
+sirc.N = 1500;
 Kstep = 20;
 sirc.q = 0.083; % recovery
 sirc.r = 0.0004; % infection prob

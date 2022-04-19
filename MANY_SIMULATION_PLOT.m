@@ -2,7 +2,7 @@
 % at some point these all need to be split off into different functions
 
 %% TODO
-% some kind train test split on 7/9, 
+% some kind train test split on 7/9,
 % alternatively, generate some new networks and try it out
 
 function ret = MANY_SIMULATION_PLOT(SIRDIR, ...
@@ -33,7 +33,7 @@ end
 
 % We need some stuff for 5 and 6 into SIRc for r-optimizing
 rmin=sirc.r/1000;
-rstep=sirc.r/1000;
+rstep=sirc.r/250;
 rmax=sirc.r;
 rarr=rmin:rstep:rmax;
 
@@ -50,7 +50,8 @@ opts = ["K vs. Maximum New Infections" ...
     "Clustering Coefficient vs. r-Compensation" ...
     "Plot a Simulation by Clustering Coefficient" ...
     "(Animated) Simple Network SIR" ...
-    "Average Path Length vs. r-Compensation"];
+    "Average Path Length vs. r-Compensation" ...
+    "Test a K against Transform (requires training r-Comp)"];
 
 choice = menu(msg,opts);
 
@@ -173,9 +174,11 @@ switch choice
                 % we have discarded some trivial fittings
                 cc = cc(beginidx:end);
 
+                % create a fitting
                 c=polyfit(log(cc),rcomp,1);
                 fit = @(x) c(1)*log(x)+c(2);
 
+                % predict then calculate error
                 prederror = (fit(cc)-rcomp)./rcomp;
 
                 subplot(2,1,1)
@@ -191,7 +194,7 @@ switch choice
                 ylabel("r Compensation Giving Best Fit")
 
                 subplot(2,1,2)
-                scatter(cc,prederror,'.')
+                scatter(cc,percerrors,'.')
                 xlim([.2 1])
                 yline(0,'-','LineWidth',2)
                 title("Residuals of Log Fit")
@@ -217,6 +220,7 @@ switch choice
                 % create a fitting
                 c=polyfit(log(cc),rcomp,1);
                 fit = @(x) c(1)*log(x)+c(2);
+                writematrix(c,METDIR+"coefs.txt");
 
                 % predict then calculate error
                 prederror = (fit(cc)-rcomp)./rcomp;
@@ -234,7 +238,7 @@ switch choice
                 ylabel("r Compensation Giving Best Fit")
 
                 subplot(2,1,2)
-                scatter(cc,prederror,'.')
+                scatter(cc,percerrors,'.')
                 xlim([.2 1])
                 yline(0,'-','LineWidth',2)
                 title("Residuals of Log Fit")
@@ -262,7 +266,7 @@ switch choice
         rn = bestrs(idx);
         [t,U] = SIRc_main(sirc.tin, sirc.U0, rn, sirc.q);
         plot(sirc.tspan+1,sirc.U2)
-        title("Network Simulation")
+        title("Outlier Simulation: A Poor Candidate for r-Compensation")
         subtitle("K value: " + sirc.karr(idx));
         xlabel("Time")
         ylabel("Infections")
@@ -442,8 +446,51 @@ switch choice
                 xlabel("Average Path Length")
                 ylabel("Error")
 
+
                 exportgraphics(gcf,"APL-r-optimization.png")
         end
+
+    case 10
+        % read in the coefficients
+        c = readmatrix(METDIR+"coefs.txt");
+
+        % get k
+        kt = inputdlg('Enter desired k-value:');
+        kt = str2double(kt);
+
+        % generate a network
+        % pass it to sirn
+        gt = WattsStrogatz(sirc.N, kt, sirc.beta);
+        at = adjacency(gt);
+
+        parentt = randi(sirc.N,1,sirc.N*sirc.parent_prop);
+        [inf,~,~,~] = ...
+            sir_simulation(at,parentt,sirc.r,[],sirc.q,200);
+
+        % pass it through log
+        mt = getGraphMetrics(gt);
+        cct = mt.avgClustering;
+        rct = c(2) + c(1)*log(cct);
+        disp(cct);
+
+        [tt,ut] = SIRc_main([0 200],[sirc.N-length(parentt) length(parentt) 0], ...
+            rct*sirc.r, sirc.q);
+
+        fch = max([max(ut(:,2)) max(inf)])*1.1;
+        lch = length(inf)*1.05;
+
+        plot(tt+1,ut(:,2));
+        hold on
+        plot(inf);
+        hold off
+        legend("Fully Connected (using transform)","Network (simulated)")
+        xlim([1 lch])
+        ylim([1 fch])
+        xlabel("Time")
+        ylabel("Infected")
+        title("Continuous with r-Compensation vs. Full, Simulations")
+        subtitle("Clustering Coefficient: "+cct+", K="+kt)
+
 
 
 
