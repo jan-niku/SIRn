@@ -51,7 +51,8 @@ opts = ["K vs. Maximum New Infections" ...
     "Plot a Simulation by Clustering Coefficient" ...
     "(Animated) Simple Network SIR" ...
     "Average Path Length vs. r-Compensation" ...
-    "Test a K against Transform (requires training r-Comp)"];
+    "Test a K against Transform (requires training r-Comp)", ...
+    "Plot K vs. Clustering Coefficients, fitted"];
 
 choice = menu(msg,opts);
 
@@ -490,6 +491,23 @@ switch choice
         ylabel("Infected")
         title("Continuous with r-Compensation vs. Full, Simulations")
         subtitle("Clustering Coefficient: "+cct+", K="+kt)
+
+    case 11
+        cc = metrics(1,:);
+        cf = polyfit(log(cc), sirc.karr, 1);
+        fitf = @(x) cf(1)*log(x)+cf(2);
+
+        kresidue = sirc.karr - fitf(cc);
+    
+        subplot(2,1,1)
+        scatter(cc, kresidue)
+        yline(0)
+
+        subplot(2,1,2)
+        plot(cc,sirc.karr)
+        hold on
+        fplot(fitf,[0.28 1])
+        hold off
 
 
 
