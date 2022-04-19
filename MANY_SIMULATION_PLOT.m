@@ -497,14 +497,20 @@ switch choice
         cf = polyfit(log(cc), sirc.karr, 1);
         fitf = @(x) cf(1)*log(x)+cf(2);
 
-        kresidue = sirc.karr - fitf(cc);
-    
+        kresidue = (sirc.karr - fitf(cc));
+
         subplot(2,1,1)
         scatter(cc, kresidue)
+        title("Residuals of prediction of K value by Clustering")
+        ylabel("Actual Error")
+        xlabel("Clustering Coefficient")
         yline(0)
 
         subplot(2,1,2)
         plot(cc,sirc.karr)
+        title("Predicted Fit vs. Actual Scatter; K vs. CC")
+        xlabel("Clustering Coefficient")
+        ylabel("K-value, Actual and Predicted")
         hold on
         fplot(fitf,[0.28 1])
         hold off
